@@ -24,7 +24,7 @@ RUN apt-get update \
     && docker-php-ext-install -j"$(nproc)" bcmath intl mbstring opcache pcntl pdo_mysql zip \
     && pecl install "xdebug-${XDEBUG_VERSION}" \
     && docker-php-ext-enable xdebug \
-    && apt-get purge --yes --auto-remove libcurl4-openssl-dev libicu-dev libonig-dev libxml2-dev libzip-dev \
+    && apt-get purge --yes libcurl4-openssl-dev libicu-dev libonig-dev libxml2-dev libzip-dev \
     && rm -rf /var/lib/apt/lists/* /tmp/pear ~/.pearrc
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
@@ -36,7 +36,7 @@ COPY doctor.sh /usr/local/bin/php-ci-doctor
 COPY entrypoint.sh /usr/local/bin/platform-ci-entrypoint
 
 RUN chmod 0755 /usr/local/bin/php-ci-doctor /usr/local/bin/platform-ci-entrypoint \
-    && php -r 'foreach (["bcmath","ctype","curl","dom","fileinfo","intl","mbstring","opcache","pcntl","pdo","pdo_mysql","tokenizer","xml","xdebug","zip"] as $extension) { if (!extension_loaded($extension)) { fwrite(STDERR, "Missing extension: {$extension}\n"); exit(1); } }' \
+    && php -r 'foreach (["bcmath"=>"bcmath","ctype"=>"ctype","curl"=>"curl","dom"=>"dom","fileinfo"=>"fileinfo","intl"=>"intl","mbstring"=>"mbstring","opcache"=>"Zend OPcache","pcntl"=>"pcntl","pdo"=>"pdo","pdo_mysql"=>"pdo_mysql","tokenizer"=>"tokenizer","xml"=>"xml","xdebug"=>"xdebug","zip"=>"zip"] as $logicalName => $extension) { if (!extension_loaded($extension)) { fwrite(STDERR, "Missing extension: {$logicalName}\n"); exit(1); } }' \
     && composer --version \
     && node --version \
     && npm --version

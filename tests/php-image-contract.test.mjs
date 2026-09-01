@@ -15,6 +15,8 @@ test("PHP CI Dockerfile uses only immutable controlled stages", () => {
   assert.match(dockerfile, /ARG XDEBUG_VERSION=3\.4\.5/u);
   assert.doesNotMatch(dockerfile, /:latest(?:\s|$)/mu);
   assert.doesNotMatch(dockerfile, /COPY\s+\.\s+/u);
+  assert.doesNotMatch(dockerfile, /apt-get purge[^\n]*--auto-remove/u);
+  assert.match(dockerfile, /Zend OPcache/u);
   for (const extension of requiredExtensions) {
     assert.ok(dockerfile.includes(extension), `missing extension contract: ${extension}`);
   }
@@ -25,6 +27,7 @@ test("doctor emits controlled machine-readable runtime metadata", () => {
   for (const field of ["schemaVersion", "logicalId", "phpMinor", "composerMajor", "nodeMajor", "architecture", "extensions"]) {
     assert.ok(doctor.includes(field), `doctor missing ${field}`);
   }
+  assert.match(doctor, /"opcache"\s*=>\s*"Zend OPcache"/u);
   assert.doesNotMatch(doctor, /(?:^|\s)(?:env|printenv)(?:\s|$)/mu);
 });
 
