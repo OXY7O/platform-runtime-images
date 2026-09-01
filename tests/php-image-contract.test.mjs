@@ -33,6 +33,8 @@ test("build script resolves the base image from catalogue and rejects free-form 
   assert.match(script, /catalogue\/php-ci\.json/u);
   assert.match(script, /logical_id/u);
   assert.match(script, /docker build/u);
+  assert.match(script, /node:24-bookworm@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2/u);
+  assert.doesNotMatch(script, /base_image="\$\(node /u);
   assert.doesNotMatch(script, /PHP_BASE_IMAGE="\$\{[1234]/u);
 });
 
