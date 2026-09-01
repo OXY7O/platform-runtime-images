@@ -1,0 +1,71 @@
+name: Validate Runtime Images
+
+on:
+  pull_request: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runtime-image-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate-php-83:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, platform-ci]
+    timeout-minutes: 45
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Validate repository contracts
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --env HOME=/tmp \
+            --volume "$PWD:/workspace" \
+            --workdir /workspace \
+            node:24-bookworm@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2 \
+            sh -c 'npm ci --ignore-scripts && npm test && npm run validate:catalogue && npm audit --audit-level=moderate'
+
+      - name: Build controlled PHP image
+        run: scripts/build-image.sh php-ci/8.3 platform-ci-php:php-8.3-test
+
+      - name: Verify controlled PHP image
+        run: scripts/verify-image.sh platform-ci-php:php-8.3-test
+
+      - name: Generate SPDX SBOM
+        run: |
+          mkdir -p reports
+          docker run --rm \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            anchore/syft:v1.33.0@sha256:f94e5d9fce1f2278491a8e3a63bd5f6ddb81fdfdbb8bf7a1637565c1d5344357 \
+            platform-ci-php:php-8.3-test -o spdx-json > reports/sbom.spdx.json
+
+      - name: Scan image vulnerabilities
+        run: |
+          docker run --rm \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --volume "$PWD/reports:/reports" \
+            aquasec/trivy:0.66.0@sha256:086971aaf400beebd94e8300fd8ea623774419597169156cec56eec5b00dfb1e \
+            image --format json --output /reports/trivy.json platform-ci-php:php-8.3-test
+
+      - name: Enforce vulnerability policy
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --env HOME=/tmp \
+            --volume "$PWD:/workspace" \
+            --workdir /workspace \
+            node:24-bookworm@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2 \
+            node scripts/evaluate-vulnerabilities.mjs reports/trivy.json policies/vulnerability-policy.json
+
+      - name: Upload non-secret validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: runtime-image-validation-${{ github.sha }}
+          path: reports/
+          retention-days: 14
+          if-no-files-found: warn
