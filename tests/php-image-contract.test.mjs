@@ -16,6 +16,9 @@ test("PHP CI Dockerfile uses only immutable controlled stages", () => {
   assert.doesNotMatch(dockerfile, /:latest(?:\s|$)/mu);
   assert.doesNotMatch(dockerfile, /COPY\s+\.\s+/u);
   assert.doesNotMatch(dockerfile, /apt-get purge[^\n]*--auto-remove/u);
+  assert.match(dockerfile, /ARG PHP_BUILD_JOBS=2/u);
+  assert.match(dockerfile, /docker-php-ext-install -j"\$\{PHP_BUILD_JOBS\}"/u);
+  assert.doesNotMatch(dockerfile, /nproc/u);
   assert.match(dockerfile, /Zend OPcache/u);
   for (const extension of requiredExtensions) {
     assert.ok(dockerfile.includes(extension), `missing extension contract: ${extension}`);
