@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OXY7O/platform-runtime-images/catalogue/php-ci.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "entries"],
+  "properties": {
+    "$schema": {"const": "./php-ci.schema.json"},
+    "schemaVersion": {"const": "1.0"},
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/entry"}
+    }
+  },
+  "$defs": {
+    "location": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["registry", "repository", "digest"],
+      "properties": {
+        "registry": {"type": "string", "pattern": "^[a-z0-9.-]+(?::[0-9]+)?$"},
+        "repository": {"type": "string", "pattern": "^[a-z0-9._/-]+$"},
+        "digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logicalId", "phpMinor", "lifecycle", "platforms", "baseImage", "toolchain", "locations"],
+      "properties": {
+        "logicalId": {"const": "php-ci/8.3"},
+        "phpMinor": {"const": "8.3"},
+        "lifecycle": {"enum": ["canonical", "maintenance", "legacy", "retired"]},
+        "platforms": {"const": ["linux/amd64"]},
+        "baseImage": {"type": "string", "pattern": "^php:8\\.3-cli-bookworm@sha256:[a-f0-9]{64}$"},
+        "toolchain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["composerMajor", "nodeMajor", "xdebug"],
+          "properties": {
+            "composerMajor": {"const": "2"},
+            "nodeMajor": {"const": "24"},
+            "xdebug": {"const": true}
+          }
+        },
+        "locations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ghcr-public", "self-managed"],
+          "properties": {
+            "ghcr-public": {"$ref": "#/$defs/location"},
+            "self-managed": {"$ref": "#/$defs/location"}
+          }
+        }
+      }
+    }
+  }
+}

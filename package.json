@@ -1,0 +1,15 @@
+{
+  "name": "@oxy7o/platform-runtime-images",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=24"},
+  "scripts": {
+    "test": "node --test tests/**/*.test.mjs",
+    "validate:catalogue": "node scripts/validate-catalogue.mjs catalogue/php-ci.json"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  }
+}
