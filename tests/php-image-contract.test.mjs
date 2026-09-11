@@ -50,6 +50,8 @@ test("build script resolves the base image from catalogue and rejects free-form 
 test("verification checks runtime, locked dependencies, and prohibited content", () => {
   const script = fs.readFileSync("scripts/verify-image.sh", "utf8");
   assert.match(script, /php-ci-doctor --json/u);
+  assert.match(script, /docker run --rm --entrypoint node "\$\{image\}" -e/u);
+  assert.doesNotMatch(script, /^node -e /mu);
   assert.match(script, /composer install --no-interaction/u);
   assert.match(script, /composer\.lock/u);
   assert.ok(script.includes("PRIVATE KEY"));
