@@ -45,7 +45,7 @@ platform-governance
 
 | Logical ID | Runtime | Lifecycle | Platform | Release | Lokasi |
 | --- | --- | --- | --- | --- | --- |
-| `php-ci/8.3` | PHP 8.3, Composer 2, Node.js 24 | `canonical` | `linux/amd64` | Menunggu `v0.1.0` | Menunggu release pertama |
+| `php-ci/8.3` | PHP 8.3, Composer 2, Node.js 24 | `canonical` | `linux/amd64` | Menunggu `v0.1.1` | Menunggu release artifact pertama |
 
 [`catalogue/php-ci.json`](catalogue/php-ci.json) adalah machine-readable source
 of truth. Tag membantu manusia menemukan release, tetapi workflow hanya boleh
@@ -96,7 +96,7 @@ sedangkan perubahan penting dicatat pada [changelog](CHANGELOG.md).
 - Dependabot memantau npm, GitHub Actions, dan Docker.
 - Pull request validation berjalan pada ephemeral GitHub-hosted runner dan tidak
   memiliki package, OIDC, atau deployment credential.
-- Self-hosted runner hanya digunakan untuk protected release dari signed tag.
+- Protected release berjalan pada ephemeral GitHub-hosted runner dari signed tag.
 - Release menghasilkan SBOM, vulnerability report, Cosign signature, provenance
   attestation, dan evidence yang mengikat semuanya ke source SHA serta image digest.
 
@@ -113,7 +113,7 @@ policy security tanpa evidence dan review CODEOWNERS.
 
 ## Roadmap
 
-- merilis dan memverifikasi `php-ci/8.3` sebagai `v0.1.0`;
+- merilis dan memverifikasi `php-ci/8.3` sebagai `v0.1.1`;
 - mengintegrasikan digest approved ke Laravel reusable workflow;
 - membuktikan cold/warm cache pada `example-app-laravel`;
 - memperluas matrix ke PHP 8.2, 8.4, dan 8.5 sesuai lifecycle;

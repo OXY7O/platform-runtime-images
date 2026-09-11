@@ -35,11 +35,6 @@ test("public pull request validation is read-only, ephemeral, and never publishe
   assert.doesNotMatch(serialized, /Clean legacy root-owned fixture output/u);
 });
 
-test("actionlint knows the governed platform runner label", () => {
-  const config = parse(fs.readFileSync(".github/actionlint.yaml", "utf8"));
-  assert.deepEqual(config["self-hosted-runner"].labels, ["platform-ci"]);
-});
-
 test("public pull request runner gap is closed with protected release separation", () => {
   const gap = fs.readFileSync("docs/SECURITY-GAPS.md", "utf8");
   assert.match(gap, /GAP-RUNNER-2026-001/u);
@@ -47,7 +42,7 @@ test("public pull request runner gap is closed with protected release separation
   assert.match(gap, /11 September 2026/u);
   assert.match(gap, /ubuntu-24\.04/u);
   assert.match(gap, /ephemeral/u);
-  assert.match(gap, /signed annotated tag/u);
+  assert.match(gap, /release.*ubuntu-24\.04/isu);
   assert.doesNotMatch(gap, /TBD|TODO|placeholder/u);
 });
 

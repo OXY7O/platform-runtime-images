@@ -6,6 +6,34 @@ mengikuti [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Planned
+
+- Approved digest integration dengan reusable Laravel workflow.
+- PHP 8.2, 8.4, dan 8.5 runtime lanes sesuai lifecycle catalogue.
+- Verified mirror ke registry yang dikelola organisasi.
+
+## [0.1.1] - 2026-09-12
+
+### Changed
+
+- Pull request dan protected release menggunakan standard GitHub-hosted
+  `ubuntu-24.04` yang ephemeral.
+- Release documentation, repository controls, dan package metadata diselaraskan
+  dengan trust boundary public repository.
+
+### Security
+
+- Self-hosted runner tidak lagi menerima source atau release credential dari
+  repository public.
+
+## [0.1.0] - 2026-09-11 [YANKED]
+
+### Release status
+
+- Signed tag dipertahankan sebagai audit trail, tetapi release workflow tidak
+  memperoleh eligible runner. No image or artifact was published, dan versi ini
+  tidak boleh digunakan oleh consumer.
+
 ### Added
 
 - Controlled PHP 8.3 CI image dengan Composer 2, Node.js 24, Xdebug, dan ekstensi Laravel.
@@ -16,21 +44,15 @@ mengikuti [Semantic Versioning](https://semver.org/).
 - Machine-readable release evidence yang mengikat source SHA, digest, signature,
   attestation, SBOM, dan workflow run.
 - Public repository security baseline, community health files, serta Dependabot.
-- Ephemeral GitHub-hosted validation untuk public pull request; self-hosted runner
-  dibatasi pada protected release.
+- Ephemeral GitHub-hosted validation untuk public pull request.
 
 ### Security
 
 - Exception kerentanan dibatasi menurut artifact, CVE, package, installed/fixed
   version, approval reference, dan expiry.
 - Policy, workflow, katalog, dan dokumentasi kritis dilindungi CODEOWNERS.
-- Risiko persistent self-hosted runner dan non-reproducible live build inputs
-  dicatat dengan remediation deadline.
+- Risiko non-reproducible live build inputs dicatat dengan remediation deadline.
 
-### Planned
-
-- Approved digest integration dengan reusable Laravel workflow.
-- PHP 8.2, 8.4, dan 8.5 runtime lanes sesuai lifecycle catalogue.
-- Verified mirror ke registry yang dikelola organisasi.
-
-[Unreleased]: https://github.com/OXY7O/platform-runtime-images/commits/main
+[Unreleased]: https://github.com/OXY7O/platform-runtime-images/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/OXY7O/platform-runtime-images/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/OXY7O/platform-runtime-images/releases/tag/v0.1.0
