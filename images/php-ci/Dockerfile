@@ -52,6 +52,7 @@ COPY entrypoint.sh /usr/local/bin/platform-ci-entrypoint
 
 RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && install -d -m 1777 /var/cache/platform/composer /var/cache/platform/npm \
     && chmod 0755 /usr/local/bin/php-ci-doctor /usr/local/bin/platform-ci-entrypoint \
     && php -r 'foreach (["bcmath"=>"bcmath","ctype"=>"ctype","curl"=>"curl","dom"=>"dom","fileinfo"=>"fileinfo","intl"=>"intl","mbstring"=>"mbstring","opcache"=>"Zend OPcache","pcntl"=>"pcntl","pdo"=>"pdo","pdo_mysql"=>"pdo_mysql","tokenizer"=>"tokenizer","xml"=>"xml","xdebug"=>"xdebug","zip"=>"zip"] as $logicalName => $extension) { if (!extension_loaded($extension)) { fwrite(STDERR, "Missing extension: {$logicalName}\n"); exit(1); } }' \
     && composer --version \

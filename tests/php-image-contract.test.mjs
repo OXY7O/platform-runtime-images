@@ -17,6 +17,7 @@ test("PHP CI Dockerfile uses only immutable controlled stages", () => {
   assert.match(dockerfile, /ARG COMPOSER_IMAGE=composer:2@sha256:d8f6343d3fae98107426bc49163ccad46ef85aabd4a27d80a74401fab4aba332/u);
   assert.match(dockerfile, /ARG NODE_IMAGE=node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0/u);
   assert.match(dockerfile, /apt-get upgrade --yes/u);
+  assert.match(dockerfile, /install -d -m 1777 \/var\/cache\/platform\/composer \/var\/cache\/platform\/npm/u);
   for (const patchedPackage of ["brace-expansion@5.0.9", "ip-address@10.3.1", "tar@7.5.21"]) {
     assert.ok(dockerfile.includes(patchedPackage), `missing patched npm dependency: ${patchedPackage}`);
   }
@@ -64,7 +65,8 @@ test("verification checks runtime, locked dependencies, and prohibited content",
   assert.match(script, /docker run --rm --entrypoint node "\$\{image\}" -e/u);
   assert.doesNotMatch(script, /^node -e /mu);
   assert.match(script, /--user "\$\(id -u\):\$\(id -g\)"/u);
-  assert.match(script, /COMPOSER_CACHE_DIR=\/tmp\/composer-cache/u);
+  assert.doesNotMatch(script, /COMPOSER_CACHE_DIR=\/tmp/u);
+  assert.match(script, /npm cache verify/u);
   assert.match(script, /composer install --no-interaction/u);
   assert.match(script, /composer\.lock/u);
   assert.ok(script.includes("PRIVATE KEY"));
