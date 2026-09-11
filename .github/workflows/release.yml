@@ -1,12 +1,6 @@
 name: Release Runtime Images
 
 on:
-  workflow_dispatch:
-    inputs:
-      release-version:
-        description: Stable Semantic Version in X.Y.Z format
-        required: true
-        type: string
   push:
     tags:
       - v*.*.*
@@ -28,9 +22,12 @@ jobs:
       packages: write
       id-token: write
       attestations: write
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      digest: ${{ steps.build.outputs.digest }}
     env:
       IMAGE_REPOSITORY: ghcr.io/oxy7o/platform-ci-php
-      REQUESTED_RELEASE: ${{ github.event_name == 'workflow_dispatch' && inputs.release-version || github.ref_name }}
+      REQUESTED_RELEASE: ${{ github.ref_name }}
     steps:
       - name: Checkout source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -43,7 +40,6 @@ jobs:
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main
 
       - name: Verify signed annotated release tag
-        if: github.event_name == 'push'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
@@ -70,10 +66,6 @@ jobs:
         id: release
         shell: bash
         run: |
-          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$GITHUB_REF" != "refs/heads/main" ]]; then
-            echo "Manual release must run from main." >&2
-            exit 1
-          fi
           release_version="${REQUESTED_RELEASE#v}"
           if [[ ! "$release_version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
             echo "Release must use stable Semantic Versioning X.Y.Z." >&2
@@ -233,3 +225,39 @@ jobs:
           path: reports/
           retention-days: 90
           if-no-files-found: warn
+
+  publish-github-release:
+    needs: [release-php-83]
+    environment: runtime-image-release
+    runs-on: [self-hosted, platform-ci]
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Publish immutable GitHub Release
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        with:
+          script: |
+            const version = "${{ needs.release-php-83.outputs.version }}";
+            const digest = "${{ needs.release-php-83.outputs.digest }}";
+            const expectedRef = `refs/tags/v${version}`;
+            if (context.ref !== expectedRef || !/^sha256:[a-f0-9]{64}$/.test(digest)) {
+              core.setFailed("Release identity or published digest is invalid.");
+              return;
+            }
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: `v${version}`,
+              target_commitish: context.sha,
+              name: `Platform Runtime Images v${version}`,
+              body: [
+                `Immutable PHP CI image release \`v${version}\`.`,
+                "",
+                `- Image: \`ghcr.io/oxy7o/platform-ci-php@${digest}\``,
+                `- Source commit: \`${context.sha}\``,
+                `- Evidence: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              ].join("\n"),
+              draft: false,
+              prerelease: false,
+            });

@@ -19,6 +19,7 @@ test("public repository has governed community health files", () => {
     "SECURITY.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",
+    "docs/PUBLIC-REPOSITORY-CONTROLS.md",
     ".github/PULL_REQUEST_TEMPLATE.md",
     ".github/ISSUE_TEMPLATE/bug.yml",
     ".github/ISSUE_TEMPLATE/runtime-request.yml",
@@ -28,7 +29,8 @@ test("public repository has governed community health files", () => {
 
   const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
   assert.match(changelog, /Semantic Versioning/u);
-  assert.match(changelog, /## \[0\.1\.0\] - 2026-09-11/u);
+  assert.match(changelog, /## \[Unreleased\]/u);
+  assert.doesNotMatch(changelog, /## \[0\.1\.0\] -/u);
   assert.match(changelog, /### Added/u);
 
   const security = fs.readFileSync("SECURITY.md", "utf8");
@@ -46,6 +48,11 @@ test("Dependabot covers all dependency ecosystems without daily noise", () => {
 test("CODEOWNERS covers public contribution and release control surfaces", () => {
   const codeowners = fs.readFileSync(".github/CODEOWNERS", "utf8");
   for (const pattern of ["/.github/", "/catalogue/", "/docs/", "/README.md", "/CHANGELOG.md", "/SECURITY.md"]) {
-    assert.ok(codeowners.split("\n").includes(`${pattern} @donibawono`), pattern);
+    assert.ok(codeowners.split("\n").includes(`${pattern} @donibawono @lethisa`), pattern);
   }
+});
+
+test("public metadata does not claim an unapproved software license", () => {
+  const dockerfile = fs.readFileSync("images/php-ci/Dockerfile", "utf8");
+  assert.doesNotMatch(dockerfile, /org\.opencontainers\.image\.licenses/u);
 });

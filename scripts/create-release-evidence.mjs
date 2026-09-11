@@ -6,7 +6,7 @@ const shaPattern = /^[a-f0-9]{40}$/u;
 const checksumPattern = /^[a-f0-9]{64}$/u;
 const runUrlPattern = /^https:\/\/github\.com\/OXY7O\/platform-runtime-images\/actions\/runs\/[0-9]+$/u;
 const attestationUrlPattern = /^https:\/\/github\.com\/OXY7O\/platform-runtime-images\/attestations\/.+$/u;
-const identityPattern = /^https:\/\/github\.com\/OXY7O\/platform-runtime-images\/\.github\/workflows\/release\.yml@refs\/(heads\/main|tags\/v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*))$/u;
+const identityPattern = /^https:\/\/github\.com\/OXY7O\/platform-runtime-images\/\.github\/workflows\/release\.yml@refs\/tags\/v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/u;
 const releasePattern = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/u;
 
 function required(value, name) {

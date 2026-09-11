@@ -12,8 +12,7 @@ const digest = `sha256:${"a".repeat(64)}`;
 
 test("release workflow is protected, immutable, and verifies the published digest", () => {
   const workflow = parse(fs.readFileSync(".github/workflows/release.yml", "utf8"));
-  assert.ok(workflow.on.workflow_dispatch);
-  assert.equal(workflow.on.workflow_dispatch.inputs["release-version"].required, true);
+  assert.equal(workflow.on.workflow_dispatch, undefined);
   assert.deepEqual(workflow.on.push.tags, ["v*.*.*"]);
   assert.equal(workflow.on.pull_request, undefined);
   assert.deepEqual(workflow.permissions, {contents: "read"});
@@ -27,6 +26,10 @@ test("release workflow is protected, immutable, and verifies the published diges
     "id-token": "write",
     attestations: "write",
   });
+  const githubRelease = workflow.jobs["publish-github-release"];
+  assert.deepEqual(githubRelease.needs, ["release-php-83"]);
+  assert.equal(githubRelease.environment, "runtime-image-release");
+  assert.deepEqual(githubRelease.permissions, {contents: "write"});
 
   const serialized = JSON.stringify(workflow);
   assert.equal(job.steps[0].with["fetch-depth"], 0);
@@ -43,6 +46,7 @@ test("release workflow is protected, immutable, and verifies the published diges
   assert.match(serialized, /cosign sign --yes/u);
   assert.match(serialized, /scripts\/record-release\.mjs/u);
   assert.match(serialized, /scripts\/create-release-evidence\.mjs/u);
+  assert.match(serialized, /github\.rest\.repos\.createRelease/u);
   assert.doesNotMatch(serialized, /pull_request_target|latest|docker push/u);
 
   for (const step of job.steps) {
@@ -58,7 +62,7 @@ test("release evidence binds digest to signature, attestation, SBOM, and workflo
     imageReference: `ghcr.io/oxy7o/platform-ci-php@${digest}`,
     runId: "12345",
     runUrl: "https://github.com/OXY7O/platform-runtime-images/actions/runs/12345",
-    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/heads/main",
+    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/tags/v0.1.0",
     attestationId: "attestation-123",
     attestationUrl: "https://github.com/OXY7O/platform-runtime-images/attestations/attestation-123",
     sbomSha256: "d".repeat(64),
@@ -70,12 +74,12 @@ test("release evidence binds digest to signature, attestation, SBOM, and workflo
   assert.equal(evidence.workflow.runUrl, "https://github.com/OXY7O/platform-runtime-images/actions/runs/12345");
 });
 
-test("release evidence rejects a tag reference and missing supply-chain references", () => {
+test("release evidence rejects a mutable image reference and missing supply-chain references", () => {
   const valid = {
     logicalId: "php-ci/8.3", release: "0.1.0", sourceSha: "c".repeat(40),
     imageReference: `ghcr.io/oxy7o/platform-ci-php@${digest}`, runId: "12345",
     runUrl: "https://github.com/OXY7O/platform-runtime-images/actions/runs/12345",
-    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/heads/main",
+    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/tags/v0.1.0",
     attestationId: "attestation-123",
     attestationUrl: "https://github.com/OXY7O/platform-runtime-images/attestations/attestation-123",
     sbomSha256: "d".repeat(64),

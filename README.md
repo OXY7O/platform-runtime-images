@@ -81,9 +81,11 @@ Project menggunakan [Semantic Versioning](https://semver.org/) dengan Git tag
 - **PATCH** untuk security rebuild, perbaikan toolchain, atau dokumentasi tanpa
   memutus consumer.
 
-Release hanya dapat berjalan dari `main` melalui environment
-`runtime-image-release` dengan required reviewer dan prevent self-review. Setiap
-versi immutable: versi yang pernah terpublikasi tidak dapat digunakan kembali.
+Release hanya dipicu oleh signed annotated tag `vMAJOR.MINOR.PATCH` yang menunjuk
+commit pada `main`, lalu melewati environment `runtime-image-release` dengan
+required reviewer dan prevent self-review. GitHub Release baru diterbitkan setelah
+image, scan, signature, attestation, dan evidence berhasil. Setiap versi immutable:
+versi yang pernah terpublikasi tidak dapat digunakan kembali.
 Prosedur lengkap tersedia pada [panduan operasi release](docs/OPERATIONS.md),
 sedangkan perubahan penting dicatat pada [changelog](CHANGELOG.md).
 
@@ -95,6 +97,9 @@ sedangkan perubahan penting dicatat pada [changelog](CHANGELOG.md).
 - Pull request validation tidak memiliki package, OIDC, atau deployment credential.
 - Release menghasilkan SBOM, vulnerability report, Cosign signature, provenance
   attestation, dan evidence yang mengikat semuanya ke source SHA serta image digest.
+
+Status aktual kontrol GitHub dan batasannya dicatat di
+[Public Repository Controls](docs/PUBLIC-REPOSITORY-CONTROLS.md).
 
 Laporkan kerentanan secara privat melalui [GitHub Security Advisory](https://github.com/OXY7O/platform-runtime-images/security/advisories/new), bukan public issue. Kebijakan lengkap tersedia di [SECURITY.md](SECURITY.md). Risiko yang diterima sementara dicatat pada [security gap register](docs/SECURITY-GAPS.md).
 

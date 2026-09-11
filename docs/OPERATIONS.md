@@ -12,10 +12,10 @@ Konfigurasi environment dan ruleset dilakukan melalui GitHub UI oleh Platform Op
 ## Menjalankan release
 
 1. Pastikan pull request release sudah merged dan seluruh check hijau.
-2. Jalankan `Release Runtime Images` dari branch `main` melalui `workflow_dispatch` dengan stable Semantic Version `MAJOR.MINOR.PATCH`, misalnya `0.1.0`. Tag `vMAJOR.MINOR.PATCH` menyediakan jalur ekuivalen, tetapi wajib berupa annotated tag dengan signature yang diverifikasi GitHub.
+2. Dari commit `main` yang sudah direview, buat signed annotated tag dengan stable Semantic Version `vMAJOR.MINOR.PATCH`, misalnya `v0.1.0`, lalu push tag tersebut. Tidak tersedia jalur release manual tanpa tag.
 3. Reviewer environment menyetujui job setelah memeriksa source SHA dan versi.
 4. Workflow membangun serta memublikasikan image, menarik ulang berdasarkan digest, menjalankan smoke test, membuat SBOM, memindai kerentanan, menandatangani image, dan membuat attestation.
-5. Unduh artifact release evidence. `release-evidence.json` mengikat digest dengan signature identity, provenance attestation, checksum SBOM, dan workflow run. Gunakan `php-ci.catalogue.candidate.json` untuk pull request katalog; jangan menyalin digest secara manual.
+5. Setelah semua gate berhasil, workflow menerbitkan GitHub Release yang mencantumkan digest dan workflow run. Unduh artifact release evidence. `release-evidence.json` mengikat digest dengan signature identity, provenance attestation, checksum SBOM, dan workflow run. Gunakan `php-ci.catalogue.candidate.json` untuk pull request katalog; jangan menyalin digest secara manual.
 
 Workflow release hanya memiliki akses baca ke source. Karena itu pembaruan katalog sengaja tidak didorong langsung ke `main`; kandidat selalu melewati pull request terpisah.
 

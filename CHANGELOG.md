@@ -6,14 +6,6 @@ mengikuti [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Planned
-
-- Approved digest integration dengan reusable Laravel workflow.
-- PHP 8.2, 8.4, dan 8.5 runtime lanes sesuai lifecycle catalogue.
-- Verified mirror ke registry yang dikelola organisasi.
-
-## [0.1.0] - 2026-09-11
-
 ### Added
 
 - Controlled PHP 8.3 CI image dengan Composer 2, Node.js 24, Xdebug, dan ekstensi Laravel.
@@ -33,5 +25,10 @@ mengikuti [Semantic Versioning](https://semver.org/).
 - Risiko persistent self-hosted runner dan non-reproducible live build inputs
   dicatat dengan remediation deadline.
 
-[Unreleased]: https://github.com/OXY7O/platform-runtime-images/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/OXY7O/platform-runtime-images/releases/tag/v0.1.0
+### Planned
+
+- Approved digest integration dengan reusable Laravel workflow.
+- PHP 8.2, 8.4, dan 8.5 runtime lanes sesuai lifecycle catalogue.
+- Verified mirror ke registry yang dikelola organisasi.
+
+[Unreleased]: https://github.com/OXY7O/platform-runtime-images/commits/main
