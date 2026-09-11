@@ -3,9 +3,14 @@ ARG COMPOSER_IMAGE=composer:2@sha256:d8f6343d3fae98107426bc49163ccad46ef85aabd4a
 ARG NODE_IMAGE=node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0
 ARG XDEBUG_VERSION=3.4.5
 ARG PHP_BUILD_JOBS=1
+ARG NPM_VERSION=12.0.2
 
 FROM ${COMPOSER_IMAGE} AS composer
 FROM ${NODE_IMAGE} AS node
+ARG NPM_VERSION
+RUN npm install --global "npm@${NPM_VERSION}" --ignore-scripts \
+    && npm install --prefix /usr/local/lib/node_modules/npm --no-save --ignore-scripts \
+      brace-expansion@5.0.9 ip-address@10.3.1 tar@7.5.21
 FROM ${PHP_BASE_IMAGE} AS runtime
 
 ARG XDEBUG_VERSION

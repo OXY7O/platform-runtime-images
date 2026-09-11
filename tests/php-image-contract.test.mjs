@@ -13,9 +13,13 @@ test("PHP CI Dockerfile uses only immutable controlled stages", () => {
   assert.match(dockerfile, /ARG COMPOSER_IMAGE/u);
   assert.match(dockerfile, /ARG NODE_IMAGE/u);
   assert.match(dockerfile, /ARG XDEBUG_VERSION=3\.4\.5/u);
+  assert.match(dockerfile, /ARG NPM_VERSION=12\.0\.2/u);
   assert.match(dockerfile, /ARG COMPOSER_IMAGE=composer:2@sha256:d8f6343d3fae98107426bc49163ccad46ef85aabd4a27d80a74401fab4aba332/u);
   assert.match(dockerfile, /ARG NODE_IMAGE=node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0/u);
   assert.match(dockerfile, /apt-get upgrade --yes/u);
+  for (const patchedPackage of ["brace-expansion@5.0.9", "ip-address@10.3.1", "tar@7.5.21"]) {
+    assert.ok(dockerfile.includes(patchedPackage), `missing patched npm dependency: ${patchedPackage}`);
+  }
   assert.doesNotMatch(dockerfile, /:latest(?:\s|$)/mu);
   assert.doesNotMatch(dockerfile, /COPY\s+\.\s+/u);
   assert.doesNotMatch(dockerfile, /apt-get purge[^\n]*--auto-remove/u);
