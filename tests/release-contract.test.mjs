@@ -32,6 +32,7 @@ test("release workflow is protected, immutable, and verifies the published diges
   assert.deepEqual(githubRelease.permissions, {contents: "write"});
 
   const serialized = JSON.stringify(workflow);
+  assert.doesNotMatch(serialized, /11d5960a326750d5838078e36cf38b85af677262|ea165f8d65b6e75b540449e92b4886f43607fa02/u);
   assert.equal(job.steps[0].with["fetch-depth"], 0);
   assert.match(serialized, /git merge-base --is-ancestor.*origin\/main/u);
   assert.match(serialized, /git\.getTag/u);

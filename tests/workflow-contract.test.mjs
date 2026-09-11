@@ -16,6 +16,7 @@ test("public pull request validation is read-only, ephemeral, and never publishe
     }
   }
   const serialized = JSON.stringify(workflow);
+  assert.doesNotMatch(serialized, /11d5960a326750d5838078e36cf38b85af677262|ea165f8d65b6e75b540449e92b4886f43607fa02/u);
   assert.doesNotMatch(serialized, /packages:write|id-token:write|docker push|build-push-action/u);
   assert.match(serialized, /scripts\/build-image\.sh/u);
   assert.match(serialized, /scripts\/verify-image\.sh/u);
