@@ -15,6 +15,8 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, platform-ci]
     timeout-minutes: 45
+    env:
+      IMAGE_TAG: platform-ci-php:php-8.3-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Clean legacy root-owned fixture output
         run: |
@@ -37,10 +39,13 @@ jobs:
             sh -c 'npm ci --ignore-scripts && npm test && npm run validate:catalogue && npm audit --audit-level=moderate'
 
       - name: Build controlled PHP image
-        run: scripts/build-image.sh php-ci/8.3 platform-ci-php:php-8.3-test
+        run: |
+          scripts/build-image.sh php-ci/8.3 "$IMAGE_TAG"
+          image_ref="$(docker image inspect --format='{{.Id}}' "$IMAGE_TAG")"
+          echo "IMAGE_REF=$image_ref" >> "$GITHUB_ENV"
 
       - name: Verify controlled PHP image
-        run: scripts/verify-image.sh platform-ci-php:php-8.3-test
+        run: scripts/verify-image.sh "$IMAGE_REF"
 
       - name: Generate SPDX SBOM
         run: |
@@ -48,7 +53,7 @@ jobs:
           docker run --rm \
             --volume /var/run/docker.sock:/var/run/docker.sock \
             anchore/syft:v1.33.0@sha256:f94e5d9fce1f2278491a8e3a63bd5f6ddb81fdfdbb8bf7a1637565c1d5344357 \
-            platform-ci-php:php-8.3-test -o spdx-json > reports/sbom.spdx.json
+            "$IMAGE_REF" -o spdx-json > reports/sbom.spdx.json
 
       - name: Scan image vulnerabilities
         run: |
@@ -56,7 +61,7 @@ jobs:
             --volume /var/run/docker.sock:/var/run/docker.sock \
             --volume "$PWD/reports:/reports" \
             aquasec/trivy:0.66.0@sha256:086971aaf400beebd94e8300fd8ea623774419597169156cec56eec5b00dfb1e \
-            image --format json --output /reports/trivy.json platform-ci-php:php-8.3-test
+            image --format json --output /reports/trivy.json "$IMAGE_REF"
 
       - name: Enforce vulnerability policy
         run: |

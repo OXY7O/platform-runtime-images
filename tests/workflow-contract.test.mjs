@@ -27,6 +27,11 @@ test("pull request validation is read-only, self-hosted, and never publishes", (
     group: "runtime-image-pr-${{ github.event.pull_request.number }}",
     "cancel-in-progress": true,
   });
+  assert.match(workflow.jobs["validate-php-83"].env.IMAGE_TAG, /github\.run_id/u);
+  assert.match(workflow.jobs["validate-php-83"].env.IMAGE_TAG, /github\.run_attempt/u);
+  assert.match(serialized, /docker image inspect/u);
+  assert.match(serialized, /IMAGE_REF/u);
+  assert.doesNotMatch(serialized, /platform-ci-php:php-8\.3-test/u);
   const steps = workflow.jobs["validate-php-83"].steps;
   assert.equal(steps[0].name, "Clean legacy root-owned fixture output");
   assert.match(steps[0].run, /images\/php-ci\/test\/fixture\/vendor/u);
