@@ -19,6 +19,13 @@ npm run validate:catalogue
 Repository ini tidak menyimpan source aplikasi, dependency aplikasi, secret,
 credential, deployment configuration, atau application runtime image.
 
+## Release image
+
+Release PHP 8.3 dilakukan melalui protected workflow dan menghasilkan GHCR
+reference berbasis digest, SBOM, vulnerability report, signature, attestation,
+serta kandidat pembaruan katalog. Prosedur konfigurasi dan operasinya tersedia
+pada [Operasi Release Runtime Image](docs/OPERATIONS.md).
+
 ## Security boundary sementara
 
 Prosedur exception pemindaian kerentanan dijelaskan dalam [Tata Kelola Exception Kerentanan](docs/VULNERABILITY-EXCEPTIONS.md).

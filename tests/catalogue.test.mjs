@@ -19,6 +19,7 @@ test("catalogue declares the controlled PHP 8.3 vertical slice", () => {
     logicalId: "php-ci/8.3",
     phpMinor: "8.3",
     lifecycle: "canonical",
+    release: null,
     platforms: ["linux/amd64"],
     baseImage: expectedBase,
     toolchain: {composerMajor: "2", nodeMajor: "24", xdebug: true},
@@ -33,6 +34,7 @@ test("catalogue rejects mutable images, duplicates, unknown fields, and unverifi
     {...valid, entries: [valid.entries[0], valid.entries[0]]},
     {...valid, entries: [{...valid.entries[0], command: "echo unsafe"}]},
     {...valid, entries: [{...valid.entries[0], platforms: ["linux/arm64"]}]},
+    {...valid, entries: [{...valid.entries[0], release: "latest"}]},
     {
       ...valid,
       entries: [{...valid.entries[0], locations: {"ghcr-public": "ghcr.io/oxy7o/platform-ci-php:latest", "self-managed": null}}],
