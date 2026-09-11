@@ -1,0 +1,39 @@
+name: Bug report
+description: Laporkan masalah pada image, katalog, atau automation.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Jangan masukkan secret atau detail kerentanan. Gunakan private vulnerability reporting untuk masalah keamanan.
+  - type: input
+    id: logical-id
+    attributes:
+      label: Logical image ID
+      placeholder: php-ci/8.3
+    validations:
+      required: true
+  - type: input
+    id: digest
+    attributes:
+      label: Image digest
+      placeholder: sha256:...
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Perilaku aktual dan yang diharapkan
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Langkah reproduksi yang telah disanitasi
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Konfirmasi
+      options:
+        - label: Laporan ini tidak mengandung secret, credential, atau detail kerentanan sensitif.
+          required: true

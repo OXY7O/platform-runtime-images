@@ -41,8 +41,7 @@ ARG IMAGE_VERSION=development
 LABEL org.opencontainers.image.title="OXY7O PHP CI Toolchain" \
       org.opencontainers.image.source="https://github.com/OXY7O/platform-runtime-images" \
       org.opencontainers.image.revision="${SOURCE_REVISION}" \
-      org.opencontainers.image.version="${IMAGE_VERSION}" \
-      org.opencontainers.image.licenses="MIT"
+      org.opencontainers.image.version="${IMAGE_VERSION}"
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 COPY --from=node /usr/local/bin/node /usr/local/bin/node

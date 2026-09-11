@@ -6,7 +6,8 @@ const shaPattern = /^[a-f0-9]{40}$/u;
 const checksumPattern = /^[a-f0-9]{64}$/u;
 const runUrlPattern = /^https:\/\/github\.com\/OXY7O\/platform-runtime-images\/actions\/runs\/[0-9]+$/u;
 const attestationUrlPattern = /^https:\/\/github\.com\/OXY7O\/platform-runtime-images\/attestations\/.+$/u;
-const identityPattern = /^https:\/\/github\.com\/OXY7O\/platform-runtime-images\/\.github\/workflows\/release\.yml@refs\/(heads\/main|tags\/runtime-images-v[0-9]{4}\.[0-9]{2}\.[0-9]+)$/u;
+const identityPattern = /^https:\/\/github\.com\/OXY7O\/platform-runtime-images\/\.github\/workflows\/release\.yml@refs\/tags\/v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/u;
+const releasePattern = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/u;
 
 function required(value, name) {
   if (typeof value !== "string" || value.trim() === "") throw new Error(`${name} is required`);
@@ -23,6 +24,7 @@ export function createReleaseEvidence(input) {
   if (!identityPattern.test(input.signatureIdentity ?? "")) throw new Error("signatureIdentity is not approved");
   if (!attestationUrlPattern.test(input.attestationUrl ?? "")) throw new Error("attestationUrl is not approved");
   if (!checksumPattern.test(input.sbomSha256 ?? "")) throw new Error("sbomSha256 must be a sha256 checksum");
+  if (!releasePattern.test(input.release ?? "")) throw new Error("release must use stable Semantic Versioning X.Y.Z");
 
   return {
     schemaVersion: "1.0",

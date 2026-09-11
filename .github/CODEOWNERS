@@ -1,4 +1,10 @@
-/policies/* @donibawono
-/scripts/evaluate-vulnerabilities.mjs @donibawono
-/.github/workflows/* @donibawono
-/.github/CODEOWNERS @donibawono
+/.github/ @donibawono @lethisa
+/catalogue/ @donibawono @lethisa
+/docs/ @donibawono @lethisa
+/images/ @donibawono @lethisa
+/policies/ @donibawono @lethisa
+/scripts/ @donibawono @lethisa
+/README.md @donibawono @lethisa
+/CHANGELOG.md @donibawono @lethisa
+/SECURITY.md @donibawono @lethisa
+/CONTRIBUTING.md @donibawono @lethisa

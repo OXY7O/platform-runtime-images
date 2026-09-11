@@ -1,0 +1,38 @@
+name: Runtime request
+description: Usulkan runtime, versi, atau capability CI baru.
+title: "request: "
+labels: [enhancement]
+body:
+  - type: input
+    id: family
+    attributes:
+      label: Technology family dan version
+      placeholder: PHP 8.4
+    validations:
+      required: true
+  - type: textarea
+    id: consumer
+    attributes:
+      label: Consumer dan use case
+      description: Sebutkan workflow/profile yang akan memakai runtime.
+    validations:
+      required: true
+  - type: dropdown
+    id: lifecycle
+    attributes:
+      label: Lifecycle yang diusulkan
+      options: [canonical, maintenance, legacy, preview]
+    validations:
+      required: true
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Toolchain, extension, platform, dan compatibility requirement
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Governance atau evidence reference
+    validations:
+      required: true

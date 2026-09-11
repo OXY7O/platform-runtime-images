@@ -12,9 +12,8 @@ const digest = `sha256:${"a".repeat(64)}`;
 
 test("release workflow is protected, immutable, and verifies the published digest", () => {
   const workflow = parse(fs.readFileSync(".github/workflows/release.yml", "utf8"));
-  assert.ok(workflow.on.workflow_dispatch);
-  assert.equal(workflow.on.workflow_dispatch.inputs["release-version"].required, true);
-  assert.deepEqual(workflow.on.push.tags, ["runtime-images-v*"]);
+  assert.equal(workflow.on.workflow_dispatch, undefined);
+  assert.deepEqual(workflow.on.push.tags, ["v*.*.*"]);
   assert.equal(workflow.on.pull_request, undefined);
   assert.deepEqual(workflow.permissions, {contents: "read"});
 
@@ -27,8 +26,13 @@ test("release workflow is protected, immutable, and verifies the published diges
     "id-token": "write",
     attestations: "write",
   });
+  const githubRelease = workflow.jobs["publish-github-release"];
+  assert.deepEqual(githubRelease.needs, ["release-php-83"]);
+  assert.equal(githubRelease.environment, "runtime-image-release");
+  assert.deepEqual(githubRelease.permissions, {contents: "write"});
 
   const serialized = JSON.stringify(workflow);
+  assert.doesNotMatch(serialized, /11d5960a326750d5838078e36cf38b85af677262|ea165f8d65b6e75b540449e92b4886f43607fa02/u);
   assert.equal(job.steps[0].with["fetch-depth"], 0);
   assert.match(serialized, /git merge-base --is-ancestor.*origin\/main/u);
   assert.match(serialized, /git\.getTag/u);
@@ -43,6 +47,7 @@ test("release workflow is protected, immutable, and verifies the published diges
   assert.match(serialized, /cosign sign --yes/u);
   assert.match(serialized, /scripts\/record-release\.mjs/u);
   assert.match(serialized, /scripts\/create-release-evidence\.mjs/u);
+  assert.match(serialized, /github\.rest\.repos\.createRelease/u);
   assert.doesNotMatch(serialized, /pull_request_target|latest|docker push/u);
 
   for (const step of job.steps) {
@@ -53,12 +58,12 @@ test("release workflow is protected, immutable, and verifies the published diges
 test("release evidence binds digest to signature, attestation, SBOM, and workflow run", () => {
   const evidence = createReleaseEvidence({
     logicalId: "php-ci/8.3",
-    release: "2026.09.0",
+    release: "0.1.0",
     sourceSha: "c".repeat(40),
     imageReference: `ghcr.io/oxy7o/platform-ci-php@${digest}`,
     runId: "12345",
     runUrl: "https://github.com/OXY7O/platform-runtime-images/actions/runs/12345",
-    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/heads/main",
+    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/tags/v0.1.0",
     attestationId: "attestation-123",
     attestationUrl: "https://github.com/OXY7O/platform-runtime-images/attestations/attestation-123",
     sbomSha256: "d".repeat(64),
@@ -70,12 +75,12 @@ test("release evidence binds digest to signature, attestation, SBOM, and workflo
   assert.equal(evidence.workflow.runUrl, "https://github.com/OXY7O/platform-runtime-images/actions/runs/12345");
 });
 
-test("release evidence rejects a tag reference and missing supply-chain references", () => {
+test("release evidence rejects a mutable image reference and missing supply-chain references", () => {
   const valid = {
-    logicalId: "php-ci/8.3", release: "2026.09.0", sourceSha: "c".repeat(40),
+    logicalId: "php-ci/8.3", release: "0.1.0", sourceSha: "c".repeat(40),
     imageReference: `ghcr.io/oxy7o/platform-ci-php@${digest}`, runId: "12345",
     runUrl: "https://github.com/OXY7O/platform-runtime-images/actions/runs/12345",
-    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/heads/main",
+    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/tags/v0.1.0",
     attestationId: "attestation-123",
     attestationUrl: "https://github.com/OXY7O/platform-runtime-images/attestations/attestation-123",
     sbomSha256: "d".repeat(64),
@@ -94,12 +99,12 @@ test("release recorder creates an immutable catalogue candidate and preserves mi
   };
   const candidate = recordRelease(catalogue, {
     logicalId: "php-ci/8.3",
-    release: "2026.09.0",
+    release: "0.1.0",
     registry: "ghcr.io",
     repository: "oxy7o/platform-ci-php",
     digest,
   });
-  assert.equal(candidate.entries[0].release, "2026.09.0");
+  assert.equal(candidate.entries[0].release, "0.1.0");
   assert.deepEqual(candidate.entries[0].locations["ghcr-public"], {
     registry: "ghcr.io",
     repository: "oxy7o/platform-ci-php",
@@ -112,10 +117,11 @@ test("release recorder creates an immutable catalogue candidate and preserves mi
 test("release recorder rejects unsafe or incomplete release identity", () => {
   const catalogue = JSON.parse(fs.readFileSync("catalogue/php-ci.json", "utf8"));
   for (const input of [
-    {logicalId: "php-ci/9.9", release: "2026.09.0", registry: "ghcr.io", repository: "oxy7o/platform-ci-php", digest},
+    {logicalId: "php-ci/9.9", release: "0.1.0", registry: "ghcr.io", repository: "oxy7o/platform-ci-php", digest},
     {logicalId: "php-ci/8.3", release: "latest", registry: "ghcr.io", repository: "oxy7o/platform-ci-php", digest},
-    {logicalId: "php-ci/8.3", release: "2026.09.0", registry: "ghcr.io", repository: "oxy7o/platform-ci-php", digest: "sha256:bad"},
-    {logicalId: "php-ci/8.3", release: "2026.09.0", registry: "evil.example", repository: "other/image", digest},
+    {logicalId: "php-ci/8.3", release: "01.0.0", registry: "ghcr.io", repository: "oxy7o/platform-ci-php", digest},
+    {logicalId: "php-ci/8.3", release: "0.1.0", registry: "ghcr.io", repository: "oxy7o/platform-ci-php", digest: "sha256:bad"},
+    {logicalId: "php-ci/8.3", release: "0.1.0", registry: "evil.example", repository: "other/image", digest},
   ]) {
     assert.throws(() => recordRelease(catalogue, input));
   }
@@ -129,9 +135,9 @@ test("release recorder CLI writes a candidate file rather than changing the sour
   const before = fs.readFileSync(source, "utf8");
   const {spawnSync} = await import("node:child_process");
   const result = spawnSync(process.execPath, [
-    "scripts/record-release.mjs", source, output, "php-ci/8.3", "2026.09.0", digest,
+    "scripts/record-release.mjs", source, output, "php-ci/8.3", "0.1.0", digest,
   ], {encoding: "utf8"});
   assert.equal(result.status, 0, result.stderr);
   assert.equal(fs.readFileSync(source, "utf8"), before);
-  assert.equal(JSON.parse(fs.readFileSync(output, "utf8")).entries[0].release, "2026.09.0");
+  assert.equal(JSON.parse(fs.readFileSync(output, "utf8")).entries[0].release, "0.1.0");
 });
