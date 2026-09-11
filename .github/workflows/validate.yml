@@ -71,7 +71,7 @@ jobs:
             --volume "$PWD:/workspace" \
             --workdir /workspace \
             node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0 \
-            node scripts/evaluate-vulnerabilities.mjs reports/trivy.json policies/vulnerability-policy.json
+            node scripts/evaluate-vulnerabilities.mjs reports/trivy.json policies/vulnerability-policy.json php-ci/8.3
 
       - name: Upload non-secret validation evidence
         if: always()

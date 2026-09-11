@@ -1,0 +1,4 @@
+/policies/* @donibawono
+/scripts/evaluate-vulnerabilities.mjs @donibawono
+/.github/workflows/* @donibawono
+/.github/CODEOWNERS @donibawono

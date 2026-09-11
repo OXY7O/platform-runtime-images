@@ -21,6 +21,8 @@ credential, deployment configuration, atau application runtime image.
 
 ## Security boundary sementara
 
+Prosedur exception pemindaian kerentanan dijelaskan dalam [Tata Kelola Exception Kerentanan](docs/VULNERABILITY-EXCEPTIONS.md).
+
 Image build sementara memakai self-hosted runner persisten karena keterbatasan
 platform saat ini. Risiko, kontrol kompensasi, pemilik, dan target migrasi ke
 runner ephemeral dicatat dalam [`docs/SECURITY-GAPS.md`](docs/SECURITY-GAPS.md).
