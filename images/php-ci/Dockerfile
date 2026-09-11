@@ -9,8 +9,16 @@ FROM ${COMPOSER_IMAGE} AS composer
 FROM ${NODE_IMAGE} AS node
 ARG NPM_VERSION
 RUN npm install --global "npm@${NPM_VERSION}" --ignore-scripts \
-    && npm install --prefix /usr/local/lib/node_modules/npm --no-save --ignore-scripts \
-      brace-expansion@5.0.9 ip-address@10.3.1 tar@7.5.21
+    && npm install --prefix /tmp/npm-patches --no-save --ignore-scripts --no-package-lock \
+      brace-expansion@5.0.9 ip-address@10.3.1 tar@7.5.21 \
+    && rm -rf \
+      /usr/local/lib/node_modules/npm/node_modules/brace-expansion \
+      /usr/local/lib/node_modules/npm/node_modules/ip-address \
+      /usr/local/lib/node_modules/npm/node_modules/tar \
+    && cp -R /tmp/npm-patches/node_modules/brace-expansion /usr/local/lib/node_modules/npm/node_modules/brace-expansion \
+    && cp -R /tmp/npm-patches/node_modules/ip-address /usr/local/lib/node_modules/npm/node_modules/ip-address \
+    && cp -R /tmp/npm-patches/node_modules/tar /usr/local/lib/node_modules/npm/node_modules/tar \
+    && rm -rf /tmp/npm-patches /root/.npm
 FROM ${PHP_BASE_IMAGE} AS runtime
 
 ARG XDEBUG_VERSION
