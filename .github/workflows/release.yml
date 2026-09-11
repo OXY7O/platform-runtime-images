@@ -99,12 +99,30 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Reject an existing release version
-        run: |
-          release_tag="${IMAGE_REPOSITORY}:php-8.3-${{ steps.release.outputs.version }}"
-          if docker manifest inspect "$release_tag" >/dev/null 2>&1; then
-            echo "Release version already exists and cannot be overwritten: $release_tag" >&2
-            exit 1
-          fi
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        with:
+          script: |
+            const releaseTag = "php-8.3-${{ steps.release.outputs.version }}";
+            let versions = [];
+            try {
+              versions = await github.paginate(
+                github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg,
+                {
+                  package_type: "container",
+                  package_name: "platform-ci-php",
+                  org: context.repo.owner,
+                  per_page: 100,
+                },
+              );
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            const exists = versions.some((version) =>
+              version.metadata?.container?.tags?.includes(releaseTag),
+            );
+            if (exists) {
+              core.setFailed(`Release version already exists and cannot be overwritten: ${releaseTag}`);
+            }
 
       - name: Build and publish controlled image
         id: build

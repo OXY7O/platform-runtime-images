@@ -33,8 +33,10 @@ test("release workflow is protected, immutable, and verifies the published diges
   assert.match(serialized, /git merge-base --is-ancestor.*origin\/main/u);
   assert.match(serialized, /git\.getTag/u);
   assert.match(serialized, /verification\?\.verified/u);
-  assert.match(serialized, /docker manifest inspect/u);
+  assert.match(serialized, /getAllPackageVersionsForPackageOwnedByOrg/u);
+  assert.match(serialized, /error\.status !== 404/u);
   assert.match(serialized, /Release version already exists/u);
+  assert.doesNotMatch(serialized, /docker manifest inspect/u);
   assert.match(serialized, /ghcr\.io\/oxy7o\/platform-ci-php/u);
   assert.match(serialized, /scripts\/verify-image\.sh.*IMAGE_REF/u);
   assert.match(serialized, /steps\.build\.outputs\.digest/u);
