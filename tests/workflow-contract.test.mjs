@@ -3,13 +3,13 @@ import fs from "node:fs";
 import test from "node:test";
 import {parse} from "yaml";
 
-test("pull request validation is read-only, self-hosted, and never publishes", () => {
+test("public pull request validation is read-only, ephemeral, and never publishes", () => {
   const workflow = parse(fs.readFileSync(".github/workflows/validate.yml", "utf8"));
   assert.ok(workflow.on.pull_request);
   assert.equal(workflow.on.pull_request_target, undefined);
   assert.deepEqual(workflow.permissions, {contents: "read"});
   for (const [jobId, job] of Object.entries(workflow.jobs)) {
-    assert.deepEqual(job["runs-on"], ["self-hosted", "platform-ci"], jobId);
+    assert.equal(job["runs-on"], "ubuntu-24.04", jobId);
     for (const step of job.steps ?? []) {
       if (!step.uses) continue;
       assert.match(step.uses, /@[a-f0-9]{40}$/u, `${jobId}: ${step.uses}`);
@@ -19,10 +19,7 @@ test("pull request validation is read-only, self-hosted, and never publishes", (
   assert.doesNotMatch(serialized, /packages:write|id-token:write|docker push|build-push-action/u);
   assert.match(serialized, /scripts\/build-image\.sh/u);
   assert.match(serialized, /scripts\/verify-image\.sh/u);
-  assert.equal(
-    workflow.jobs["validate-php-83"].if,
-    "github.event.pull_request.head.repo.full_name == github.repository",
-  );
+  assert.equal(workflow.jobs["validate-php-83"].if, undefined);
   assert.deepEqual(workflow.concurrency, {
     group: "runtime-image-pr-${{ github.event.pull_request.number }}",
     "cancel-in-progress": true,
@@ -33,9 +30,8 @@ test("pull request validation is read-only, self-hosted, and never publishes", (
   assert.match(serialized, /IMAGE_REF/u);
   assert.doesNotMatch(serialized, /platform-ci-php:php-8\.3-test/u);
   const steps = workflow.jobs["validate-php-83"].steps;
-  assert.equal(steps[0].name, "Clean legacy root-owned fixture output");
-  assert.match(steps[0].run, /images\/php-ci\/test\/fixture\/vendor/u);
-  assert.equal(steps[1].name, "Checkout source");
+  assert.equal(steps[0].name, "Checkout source");
+  assert.doesNotMatch(serialized, /Clean legacy root-owned fixture output/u);
 });
 
 test("actionlint knows the governed platform runner label", () => {
@@ -43,12 +39,14 @@ test("actionlint knows the governed platform runner label", () => {
   assert.deepEqual(config["self-hosted-runner"].labels, ["platform-ci"]);
 });
 
-test("temporary self-hosted build risk is recorded with concrete remediation", () => {
+test("public pull request runner gap is closed with protected release separation", () => {
   const gap = fs.readFileSync("docs/SECURITY-GAPS.md", "utf8");
   assert.match(gap, /GAP-RUNNER-2026-001/u);
-  assert.match(gap, /30 November 2026/u);
+  assert.match(gap, /\*\*Status:\*\* Closed/u);
+  assert.match(gap, /11 September 2026/u);
+  assert.match(gap, /ubuntu-24\.04/u);
   assert.match(gap, /ephemeral/u);
-  assert.match(gap, /Platform Operations dan Platform Security/u);
+  assert.match(gap, /signed annotated tag/u);
   assert.doesNotMatch(gap, /TBD|TODO|placeholder/u);
 });
 

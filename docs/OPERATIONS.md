@@ -5,7 +5,7 @@
 1. Buat GitHub Environment `runtime-image-release`.
 2. Tetapkan reviewer dari Platform Operations atau Platform Security dan cegah self-review jika paket GitHub organisasi mendukungnya.
 3. Terapkan ruleset pada `main` dan tag `v*.*.*`; perubahan workflow, policy, dan katalog harus melewati CODEOWNERS review.
-4. Pastikan runner `platform-ci` hanya menerima release dari commit yang telah direview dan tidak menyimpan deployment credential.
+4. Pastikan runner `platform-ci` hanya menerima release dari commit yang telah direview dan tidak menyimpan deployment credential. Pull request public wajib berjalan pada ephemeral GitHub-hosted runner, bukan self-hosted runner.
 
 Konfigurasi environment dan ruleset dilakukan melalui GitHub UI oleh Platform Operations. Workflow tidak boleh menganggap konfigurasi tersebut sudah aktif tanpa verifikasi evidence.
 

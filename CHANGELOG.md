@@ -16,6 +16,8 @@ mengikuti [Semantic Versioning](https://semver.org/).
 - Machine-readable release evidence yang mengikat source SHA, digest, signature,
   attestation, SBOM, dan workflow run.
 - Public repository security baseline, community health files, serta Dependabot.
+- Ephemeral GitHub-hosted validation untuk public pull request; self-hosted runner
+  dibatasi pada protected release.
 
 ### Security
 

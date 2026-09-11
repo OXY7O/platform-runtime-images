@@ -17,6 +17,7 @@ file ini menjadi rekaman yang mudah direview dan tidak menyimpan secret.
 | Code scanning | Aktif | CodeQL default setup dengan extended query suite |
 | Dependency security | Aktif | Vulnerability alerts, security updates, dan Dependabot |
 | Pelaporan kerentanan | Aktif | Private vulnerability reporting |
+| Pull request runner | Aktif | Ephemeral GitHub-hosted `ubuntu-24.04` dengan `contents: read` |
 | Release approval | Aktif | Environment `runtime-image-release`, reviewer `@lethisa`, prevent self-review |
 | Release branch policy | Sementara | `main`; diganti menjadi tag `v*.*.*` saat workflow SemVer merged |
 
@@ -25,7 +26,8 @@ file ini menjadi rekaman yang mudah direview dan tidak menyimpan secret.
 - `CODEOWNERS` melindungi workflow, image, policy, katalog, dokumentasi, dan
   community health files melalui `@donibawono` dan `@lethisa`.
 - Pull request validation menguji kontrak, katalog, image build, SBOM, dan
-  vulnerability policy tanpa deployment credential.
+  vulnerability policy pada ephemeral GitHub-hosted runner tanpa deployment
+  credential. Self-hosted runner tidak menerima kode pull request public.
 - Release hanya menerima signed annotated SemVer tag yang menunjuk commit pada
   `main` dan menerbitkan GitHub Release setelah seluruh gate berhasil.
 - Security advisory digunakan untuk laporan kerentanan; public issue tidak boleh

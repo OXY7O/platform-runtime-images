@@ -94,7 +94,9 @@ sedangkan perubahan penting dicatat pada [changelog](CHANGELOG.md).
 - Secret scanning dan push protection aktif.
 - CodeQL default setup memakai extended query suite.
 - Dependabot memantau npm, GitHub Actions, dan Docker.
-- Pull request validation tidak memiliki package, OIDC, atau deployment credential.
+- Pull request validation berjalan pada ephemeral GitHub-hosted runner dan tidak
+  memiliki package, OIDC, atau deployment credential.
+- Self-hosted runner hanya digunakan untuk protected release dari signed tag.
 - Release menghasilkan SBOM, vulnerability report, Cosign signature, provenance
   attestation, dan evidence yang mengikat semuanya ke source SHA serta image digest.
 
