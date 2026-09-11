@@ -1,6 +1,6 @@
 ARG PHP_BASE_IMAGE=php:8.3-cli-bookworm@sha256:177529735599a8244b2c903522f029839dce1c2ac4be122fdc00ada4b45a20e4
-ARG COMPOSER_IMAGE=composer:2@sha256:d020706319701a44468968321dccd0fce6620190159a7a9ec195d78e6e971c71
-ARG NODE_IMAGE=node:24-bookworm@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2
+ARG COMPOSER_IMAGE=composer:2@sha256:d8f6343d3fae98107426bc49163ccad46ef85aabd4a27d80a74401fab4aba332
+ARG NODE_IMAGE=node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0
 ARG XDEBUG_VERSION=3.4.5
 ARG PHP_BUILD_JOBS=1
 
@@ -12,6 +12,7 @@ ARG XDEBUG_VERSION
 ARG PHP_BUILD_JOBS
 
 RUN apt-get update \
+    && apt-get upgrade --yes \
     && apt-get install --yes --no-install-recommends \
       ca-certificates git libcurl4-openssl-dev libicu-dev libonig-dev \
       libxml2-dev libzip-dev unzip \

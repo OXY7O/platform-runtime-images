@@ -26,7 +26,7 @@ jobs:
             --env HOME=/tmp \
             --volume "$PWD:/workspace" \
             --workdir /workspace \
-            node:24-bookworm@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2 \
+            node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0 \
             sh -c 'npm ci --ignore-scripts && npm test && npm run validate:catalogue && npm audit --audit-level=moderate'
 
       - name: Build controlled PHP image
@@ -58,7 +58,7 @@ jobs:
             --env HOME=/tmp \
             --volume "$PWD:/workspace" \
             --workdir /workspace \
-            node:24-bookworm@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2 \
+            node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0 \
             node scripts/evaluate-vulnerabilities.mjs reports/trivy.json policies/vulnerability-policy.json
 
       - name: Upload non-secret validation evidence

@@ -13,6 +13,9 @@ test("PHP CI Dockerfile uses only immutable controlled stages", () => {
   assert.match(dockerfile, /ARG COMPOSER_IMAGE/u);
   assert.match(dockerfile, /ARG NODE_IMAGE/u);
   assert.match(dockerfile, /ARG XDEBUG_VERSION=3\.4\.5/u);
+  assert.match(dockerfile, /ARG COMPOSER_IMAGE=composer:2@sha256:d8f6343d3fae98107426bc49163ccad46ef85aabd4a27d80a74401fab4aba332/u);
+  assert.match(dockerfile, /ARG NODE_IMAGE=node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0/u);
+  assert.match(dockerfile, /apt-get upgrade --yes/u);
   assert.doesNotMatch(dockerfile, /:latest(?:\s|$)/mu);
   assert.doesNotMatch(dockerfile, /COPY\s+\.\s+/u);
   assert.doesNotMatch(dockerfile, /apt-get purge[^\n]*--auto-remove/u);
@@ -46,7 +49,7 @@ test("build script resolves the base image from catalogue and rejects free-form 
   assert.match(script, /catalogue\/php-ci\.json/u);
   assert.match(script, /logical_id/u);
   assert.match(script, /docker build/u);
-  assert.match(script, /node:24-bookworm@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2/u);
+  assert.match(script, /node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0/u);
   assert.doesNotMatch(script, /base_image="\$\(node /u);
   assert.doesNotMatch(script, /PHP_BASE_IMAGE="\$\{[1234]/u);
 });
