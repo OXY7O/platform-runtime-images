@@ -31,13 +31,13 @@ RUN apt-get update \
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
-COPY --from=node /usr/local/bin/npm /usr/local/bin/npm
-COPY --from=node /usr/local/bin/npx /usr/local/bin/npx
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY doctor.sh /usr/local/bin/php-ci-doctor
 COPY entrypoint.sh /usr/local/bin/platform-ci-entrypoint
 
-RUN chmod 0755 /usr/local/bin/php-ci-doctor /usr/local/bin/platform-ci-entrypoint \
+RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && chmod 0755 /usr/local/bin/php-ci-doctor /usr/local/bin/platform-ci-entrypoint \
     && php -r 'foreach (["bcmath"=>"bcmath","ctype"=>"ctype","curl"=>"curl","dom"=>"dom","fileinfo"=>"fileinfo","intl"=>"intl","mbstring"=>"mbstring","opcache"=>"Zend OPcache","pcntl"=>"pcntl","pdo"=>"pdo","pdo_mysql"=>"pdo_mysql","tokenizer"=>"tokenizer","xml"=>"xml","xdebug"=>"xdebug","zip"=>"zip"] as $logicalName => $extension) { if (!extension_loaded($extension)) { fwrite(STDERR, "Missing extension: {$logicalName}\n"); exit(1); } }' \
     && composer --version \
     && node --version \
