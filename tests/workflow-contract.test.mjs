@@ -51,3 +51,13 @@ test("temporary self-hosted build risk is recorded with concrete remediation", (
   assert.match(gap, /Platform Operations dan Platform Security/u);
   assert.doesNotMatch(gap, /TBD|TODO|placeholder/u);
 });
+
+test("live build input reproducibility gap is explicit and time-bound", () => {
+  const gap = fs.readFileSync("docs/SECURITY-GAPS.md", "utf8");
+  assert.match(gap, /GAP-BUILD-2026-002/u);
+  assert.match(gap, /28 February 2027/u);
+  assert.match(gap, /Debian snapshot/u);
+  assert.match(gap, /integrity hash/u);
+  assert.match(gap, /tidak mengklaim build byte-for-byte reproducible/u);
+  assert.doesNotMatch(gap, /TBD|TODO|placeholder/u);
+});

@@ -46,3 +46,49 @@ review:
 Setelah migrasi, self-hosted runner persisten hanya boleh melakukan protected
 release dari commit yang telah direview. Penutupan gap membutuhkan evidence
 isolasi, permission review, successful canary, dan pembaruan dokumen operasi.
+
+## GAP-BUILD-2026-002 — Reproducibility input build
+
+**Status:** Accepted temporarily
+
+**Recorded:** 11 September 2026
+
+**Review deadline:** 28 February 2027
+
+**Accountable functions:** Platform Operations dan Platform Security
+
+### Kondisi
+
+Base image dan image tool telah dipin menggunakan digest immutable. Namun,
+paket dari repository APT, ekstensi PECL, dan paket npm masih diselesaikan dari
+sumber aktif saat build berlangsung. Karena isi sumber tersebut dapat berubah,
+dua build dari commit yang sama belum dijamin menghasilkan byte yang identik.
+Repository ini tidak mengklaim build byte-for-byte reproducible selama gap ini
+masih terbuka.
+
+### Kontrol kompensasi
+
+- versi dependency dipin secara eksplisit sejauh didukung sumber upstream;
+- base image dan image alat validasi dipin dengan digest;
+- setiap build menghasilkan SBOM dan laporan kerentanan;
+- policy gate memblokir kerentanan Critical dan High yang memiliki perbaikan,
+  kecuali ada exception terkontrol;
+- image yang dipromosikan dan dikonsumsi wajib direferensikan melalui digest;
+- evidence build mengikat commit, logical artifact ID, hasil validasi, dan image
+  digest yang dihasilkan.
+
+### Remediation target
+
+Sebelum tenggat review, evaluasi dan terapkan rangkaian kontrol berikut:
+
+1. gunakan Debian snapshot atau mirror paket ekuivalen yang immutable;
+2. pin artefak PECL dan npm dengan integrity hash atau artefak terverifikasi
+   yang dikelola organisasi;
+3. simpan manifest seluruh input build beserta checksum-nya;
+4. jalankan rebuild comparison untuk mengukur dan membuktikan reproducibility;
+5. perbarui katalog serta evidence schema sebelum klaim reproducible diaktifkan.
+
+Gap hanya boleh ditutup setelah build berulang dari input yang sama menghasilkan
+digest yang sama atau seluruh perbedaan yang tersisa telah diidentifikasi,
+didokumentasikan, dan disetujui sebagai non-deterministik yang tidak dapat
+dihindari.
