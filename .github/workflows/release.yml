@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       release-version:
-        description: CalVer release in YYYY.MM.N format
+        description: Stable Semantic Version in X.Y.Z format
         required: true
         type: string
   push:
     tags:
-      - runtime-images-v*
+      - v*.*.*
 
 permissions:
   contents: read
@@ -74,9 +74,9 @@ jobs:
             echo "Manual release must run from main." >&2
             exit 1
           fi
-          release_version="${REQUESTED_RELEASE#runtime-images-v}"
-          if [[ ! "$release_version" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]+$ ]]; then
-            echo "Release must use YYYY.MM.N." >&2
+          release_version="${REQUESTED_RELEASE#v}"
+          if [[ ! "$release_version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "Release must use stable Semantic Versioning X.Y.Z." >&2
             exit 1
           fi
           echo "version=$release_version" >> "$GITHUB_OUTPUT"

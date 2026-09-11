@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import {pathToFileURL} from "node:url";
 
-const releasePattern = /^[0-9]{4}\.[0-9]{2}\.[0-9]+$/u;
+const releasePattern = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/u;
 const digestPattern = /^sha256:[a-f0-9]{64}$/u;
 
 export function recordRelease(catalogue, input) {
-  if (!releasePattern.test(input.release ?? "")) throw new Error("release must use YYYY.MM.N");
+  if (!releasePattern.test(input.release ?? "")) throw new Error("release must use stable Semantic Versioning X.Y.Z");
   if (!digestPattern.test(input.digest ?? "")) throw new Error("digest must be an immutable sha256 digest");
   if (input.registry !== "ghcr.io" || input.repository !== "oxy7o/platform-ci-php") {
     throw new Error("public release location is controlled by platform policy");
