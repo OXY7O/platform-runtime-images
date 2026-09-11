@@ -1,0 +1,63 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import test from "node:test";
+import {parse} from "yaml";
+
+test("pull request validation is read-only, self-hosted, and never publishes", () => {
+  const workflow = parse(fs.readFileSync(".github/workflows/validate.yml", "utf8"));
+  assert.ok(workflow.on.pull_request);
+  assert.equal(workflow.on.pull_request_target, undefined);
+  assert.deepEqual(workflow.permissions, {contents: "read"});
+  for (const [jobId, job] of Object.entries(workflow.jobs)) {
+    assert.deepEqual(job["runs-on"], ["self-hosted", "platform-ci"], jobId);
+    for (const step of job.steps ?? []) {
+      if (!step.uses) continue;
+      assert.match(step.uses, /@[a-f0-9]{40}$/u, `${jobId}: ${step.uses}`);
+    }
+  }
+  const serialized = JSON.stringify(workflow);
+  assert.doesNotMatch(serialized, /packages:write|id-token:write|docker push|build-push-action/u);
+  assert.match(serialized, /scripts\/build-image\.sh/u);
+  assert.match(serialized, /scripts\/verify-image\.sh/u);
+  assert.equal(
+    workflow.jobs["validate-php-83"].if,
+    "github.event.pull_request.head.repo.full_name == github.repository",
+  );
+  assert.deepEqual(workflow.concurrency, {
+    group: "runtime-image-pr-${{ github.event.pull_request.number }}",
+    "cancel-in-progress": true,
+  });
+  assert.match(workflow.jobs["validate-php-83"].env.IMAGE_TAG, /github\.run_id/u);
+  assert.match(workflow.jobs["validate-php-83"].env.IMAGE_TAG, /github\.run_attempt/u);
+  assert.match(serialized, /docker image inspect/u);
+  assert.match(serialized, /IMAGE_REF/u);
+  assert.doesNotMatch(serialized, /platform-ci-php:php-8\.3-test/u);
+  const steps = workflow.jobs["validate-php-83"].steps;
+  assert.equal(steps[0].name, "Clean legacy root-owned fixture output");
+  assert.match(steps[0].run, /images\/php-ci\/test\/fixture\/vendor/u);
+  assert.equal(steps[1].name, "Checkout source");
+});
+
+test("actionlint knows the governed platform runner label", () => {
+  const config = parse(fs.readFileSync(".github/actionlint.yaml", "utf8"));
+  assert.deepEqual(config["self-hosted-runner"].labels, ["platform-ci"]);
+});
+
+test("temporary self-hosted build risk is recorded with concrete remediation", () => {
+  const gap = fs.readFileSync("docs/SECURITY-GAPS.md", "utf8");
+  assert.match(gap, /GAP-RUNNER-2026-001/u);
+  assert.match(gap, /30 November 2026/u);
+  assert.match(gap, /ephemeral/u);
+  assert.match(gap, /Platform Operations dan Platform Security/u);
+  assert.doesNotMatch(gap, /TBD|TODO|placeholder/u);
+});
+
+test("live build input reproducibility gap is explicit and time-bound", () => {
+  const gap = fs.readFileSync("docs/SECURITY-GAPS.md", "utf8");
+  assert.match(gap, /GAP-BUILD-2026-002/u);
+  assert.match(gap, /28 February 2027/u);
+  assert.match(gap, /Debian snapshot/u);
+  assert.match(gap, /integrity hash/u);
+  assert.match(gap, /tidak mengklaim build byte-for-byte reproducible/u);
+  assert.doesNotMatch(gap, /TBD|TODO|placeholder/u);
+});
