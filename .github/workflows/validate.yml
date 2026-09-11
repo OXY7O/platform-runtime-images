@@ -16,6 +16,13 @@ jobs:
     runs-on: [self-hosted, platform-ci]
     timeout-minutes: 45
     steps:
+      - name: Clean legacy root-owned fixture output
+        run: |
+          docker run --rm \
+            --volume "$PWD:/workspace" \
+            node:24-bookworm@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0 \
+            rm -rf /workspace/images/php-ci/test/fixture/vendor
+
       - name: Checkout source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 

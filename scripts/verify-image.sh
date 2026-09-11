@@ -20,6 +20,9 @@ docker run --rm --entrypoint sh "${image}" -c '
 '
 
 docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  --env HOME=/tmp \
+  --env COMPOSER_CACHE_DIR=/tmp/composer-cache \
   --volume "${fixture}:/workspace" \
   --workdir /workspace \
   "${image}" \

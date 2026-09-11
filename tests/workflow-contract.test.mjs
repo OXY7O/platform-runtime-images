@@ -27,6 +27,10 @@ test("pull request validation is read-only, self-hosted, and never publishes", (
     group: "runtime-image-pr-${{ github.event.pull_request.number }}",
     "cancel-in-progress": true,
   });
+  const steps = workflow.jobs["validate-php-83"].steps;
+  assert.equal(steps[0].name, "Clean legacy root-owned fixture output");
+  assert.match(steps[0].run, /images\/php-ci\/test\/fixture\/vendor/u);
+  assert.equal(steps[1].name, "Checkout source");
 });
 
 test("actionlint knows the governed platform runner label", () => {

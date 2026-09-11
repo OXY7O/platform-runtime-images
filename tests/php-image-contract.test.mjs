@@ -59,6 +59,8 @@ test("verification checks runtime, locked dependencies, and prohibited content",
   assert.match(script, /php-ci-doctor --json/u);
   assert.match(script, /docker run --rm --entrypoint node "\$\{image\}" -e/u);
   assert.doesNotMatch(script, /^node -e /mu);
+  assert.match(script, /--user "\$\(id -u\):\$\(id -g\)"/u);
+  assert.match(script, /COMPOSER_CACHE_DIR=\/tmp\/composer-cache/u);
   assert.match(script, /composer install --no-interaction/u);
   assert.match(script, /composer\.lock/u);
   assert.ok(script.includes("PRIVATE KEY"));
