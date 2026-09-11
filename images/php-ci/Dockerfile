@@ -10,14 +10,6 @@ FROM ${PHP_BASE_IMAGE} AS runtime
 
 ARG XDEBUG_VERSION
 ARG PHP_BUILD_JOBS
-ARG SOURCE_REVISION=uncommitted
-ARG IMAGE_VERSION=development
-
-LABEL org.opencontainers.image.title="OXY7O PHP CI Toolchain" \
-      org.opencontainers.image.source="https://github.com/OXY7O/platform-runtime-images" \
-      org.opencontainers.image.revision="${SOURCE_REVISION}" \
-      org.opencontainers.image.version="${IMAGE_VERSION}" \
-      org.opencontainers.image.licenses="MIT"
 
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends \
@@ -28,6 +20,15 @@ RUN apt-get update \
     && docker-php-ext-enable xdebug \
     && apt-get purge --yes libcurl4-openssl-dev libicu-dev libonig-dev libxml2-dev libzip-dev \
     && rm -rf /var/lib/apt/lists/* /tmp/pear ~/.pearrc
+
+ARG SOURCE_REVISION=uncommitted
+ARG IMAGE_VERSION=development
+
+LABEL org.opencontainers.image.title="OXY7O PHP CI Toolchain" \
+      org.opencontainers.image.source="https://github.com/OXY7O/platform-runtime-images" \
+      org.opencontainers.image.revision="${SOURCE_REVISION}" \
+      org.opencontainers.image.version="${IMAGE_VERSION}" \
+      org.opencontainers.image.licenses="MIT"
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
