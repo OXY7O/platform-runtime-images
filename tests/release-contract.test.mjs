@@ -6,6 +6,7 @@ import test from "node:test";
 import {parse} from "yaml";
 
 import {recordRelease} from "../scripts/record-release.mjs";
+import {createReleaseEvidence} from "../scripts/create-release-evidence.mjs";
 
 const digest = `sha256:${"a".repeat(64)}`;
 
@@ -30,16 +31,56 @@ test("release workflow is protected, immutable, and verifies the published diges
   const serialized = JSON.stringify(workflow);
   assert.equal(job.steps[0].with["fetch-depth"], 0);
   assert.match(serialized, /git merge-base --is-ancestor.*origin\/main/u);
+  assert.match(serialized, /git\.getTag/u);
+  assert.match(serialized, /verification\?\.verified/u);
+  assert.match(serialized, /docker manifest inspect/u);
+  assert.match(serialized, /Release version already exists/u);
   assert.match(serialized, /ghcr\.io\/oxy7o\/platform-ci-php/u);
   assert.match(serialized, /scripts\/verify-image\.sh.*IMAGE_REF/u);
   assert.match(serialized, /steps\.build\.outputs\.digest/u);
   assert.match(serialized, /cosign sign --yes/u);
   assert.match(serialized, /scripts\/record-release\.mjs/u);
+  assert.match(serialized, /scripts\/create-release-evidence\.mjs/u);
   assert.doesNotMatch(serialized, /pull_request_target|latest|docker push/u);
 
   for (const step of job.steps) {
     if (step.uses) assert.match(step.uses, /@[a-f0-9]{40}$/u, step.uses);
   }
+});
+
+test("release evidence binds digest to signature, attestation, SBOM, and workflow run", () => {
+  const evidence = createReleaseEvidence({
+    logicalId: "php-ci/8.3",
+    release: "2026.09.0",
+    sourceSha: "c".repeat(40),
+    imageReference: `ghcr.io/oxy7o/platform-ci-php@${digest}`,
+    runId: "12345",
+    runUrl: "https://github.com/OXY7O/platform-runtime-images/actions/runs/12345",
+    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/heads/main",
+    attestationId: "attestation-123",
+    attestationUrl: "https://github.com/OXY7O/platform-runtime-images/attestations/attestation-123",
+    sbomSha256: "d".repeat(64),
+  });
+  assert.equal(evidence.image.digest, digest);
+  assert.equal(evidence.signature.subject, evidence.image.reference);
+  assert.equal(evidence.provenance.attestationId, "attestation-123");
+  assert.equal(evidence.sbom.sha256, "d".repeat(64));
+  assert.equal(evidence.workflow.runUrl, "https://github.com/OXY7O/platform-runtime-images/actions/runs/12345");
+});
+
+test("release evidence rejects a tag reference and missing supply-chain references", () => {
+  const valid = {
+    logicalId: "php-ci/8.3", release: "2026.09.0", sourceSha: "c".repeat(40),
+    imageReference: `ghcr.io/oxy7o/platform-ci-php@${digest}`, runId: "12345",
+    runUrl: "https://github.com/OXY7O/platform-runtime-images/actions/runs/12345",
+    signatureIdentity: "https://github.com/OXY7O/platform-runtime-images/.github/workflows/release.yml@refs/heads/main",
+    attestationId: "attestation-123",
+    attestationUrl: "https://github.com/OXY7O/platform-runtime-images/attestations/attestation-123",
+    sbomSha256: "d".repeat(64),
+  };
+  assert.throws(() => createReleaseEvidence({...valid, imageReference: "ghcr.io/oxy7o/platform-ci-php:latest"}));
+  assert.throws(() => createReleaseEvidence({...valid, attestationUrl: ""}));
+  assert.throws(() => createReleaseEvidence({...valid, sbomSha256: "bad"}));
 });
 
 test("release recorder creates an immutable catalogue candidate and preserves mirrors", () => {

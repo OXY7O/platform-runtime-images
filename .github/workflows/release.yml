@@ -42,10 +42,38 @@ jobs:
           git fetch --no-tags origin main:refs/remotes/origin/main
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main
 
+      - name: Verify signed annotated release tag
+        if: github.event_name == 'push'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        with:
+          script: |
+            const name = context.ref.replace("refs/tags/", "");
+            const ref = await github.rest.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `tags/${name}`,
+            });
+            if (ref.data.object.type !== "tag") {
+              core.setFailed("Release tag must be annotated and signed.");
+              return;
+            }
+            const tag = await github.rest.git.getTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_sha: ref.data.object.sha,
+            });
+            if (!tag.data.verification?.verified || tag.data.object.sha !== context.sha) {
+              core.setFailed("Release tag signature or target is not verified.");
+            }
+
       - name: Validate release identity
         id: release
         shell: bash
         run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Manual release must run from main." >&2
+            exit 1
+          fi
           release_version="${REQUESTED_RELEASE#runtime-images-v}"
           if [[ ! "$release_version" =~ ^[0-9]{4}\.[0-9]{2}\.[0-9]+$ ]]; then
             echo "Release must use YYYY.MM.N." >&2
@@ -70,6 +98,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Reject an existing release version
+        run: |
+          release_tag="${IMAGE_REPOSITORY}:php-8.3-${{ steps.release.outputs.version }}"
+          if docker manifest inspect "$release_tag" >/dev/null 2>&1; then
+            echo "Release version already exists and cannot be overwritten: $release_tag" >&2
+            exit 1
+          fi
+
       - name: Build and publish controlled image
         id: build
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
@@ -92,6 +128,7 @@ jobs:
             exit 1
           fi
           echo "IMAGE_REF=${IMAGE_REPOSITORY}@${{ steps.build.outputs.digest }}" >> "$GITHUB_ENV"
+          echo "SIGNATURE_IDENTITY=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/.github/workflows/release.yml@${GITHUB_REF}" >> "$GITHUB_ENV"
           docker pull "${IMAGE_REPOSITORY}@${{ steps.build.outputs.digest }}"
 
       - name: Verify published image by digest
@@ -129,7 +166,15 @@ jobs:
       - name: Sign published image
         run: cosign sign --yes "$IMAGE_REF"
 
+      - name: Verify published signature
+        run: |
+          cosign verify \
+            --certificate-identity "$SIGNATURE_IDENTITY" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            "$IMAGE_REF"
+
       - name: Attest build provenance
+        id: attest
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a
         with:
           subject-name: ${{ env.IMAGE_REPOSITORY }}
@@ -147,9 +192,20 @@ jobs:
 
       - name: Record release evidence
         run: |
-          printf '%s\n' \
-            "{\"schemaVersion\":\"1.0\",\"logicalId\":\"php-ci/8.3\",\"release\":\"${{ steps.release.outputs.version }}\",\"sourceSha\":\"${{ github.sha }}\",\"imageReference\":\"$IMAGE_REF\",\"runId\":\"${{ github.run_id }}\"}" \
-            > reports/release-evidence.json
+          cp "${{ steps.attest.outputs.bundle-path }}" reports/provenance.bundle.jsonl
+          sbom_sha="$(sha256sum reports/sbom.spdx.json | cut -d ' ' -f1)"
+          node scripts/create-release-evidence.mjs \
+            reports/release-evidence.json \
+            php-ci/8.3 \
+            "${{ steps.release.outputs.version }}" \
+            "${{ github.sha }}" \
+            "$IMAGE_REF" \
+            "${{ github.run_id }}" \
+            "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            "$SIGNATURE_IDENTITY" \
+            "${{ steps.attest.outputs.attestation-id }}" \
+            "${{ steps.attest.outputs.attestation-url }}" \
+            "$sbom_sha"
 
       - name: Upload non-secret release evidence
         if: always()
