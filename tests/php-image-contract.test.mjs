@@ -73,3 +73,11 @@ test("verification checks runtime, locked dependencies, and prohibited content",
   assert.match(script, /node_modules/u);
   assert.match(script, /vendor/u);
 });
+
+test("Laravel fixture boots the locked framework container", () => {
+  const smokeTest = fs.readFileSync("images/php-ci/test/fixture/tests/RuntimeSmokeTest.php", "utf8");
+  assert.match(smokeTest, /Illuminate\\Foundation\\Application/u);
+  assert.match(smokeTest, /new Application/u);
+  assert.match(smokeTest, /->make\(/u);
+  assert.match(smokeTest, /->version\(\)/u);
+});
