@@ -94,6 +94,7 @@ test("release evidence rejects a mutable image reference and missing supply-chai
 
 test("release recorder creates an immutable catalogue candidate and preserves mirrors", () => {
   const catalogue = JSON.parse(fs.readFileSync("catalogue/php-ci.json", "utf8"));
+  const originalRelease = catalogue.entries[0].release;
   catalogue.entries[0].locations["self-managed"] = {
     registry: "registry.example.internal",
     repository: "platform/php-ci",
@@ -113,7 +114,7 @@ test("release recorder creates an immutable catalogue candidate and preserves mi
     digest,
   });
   assert.equal(candidate.entries[0].locations["self-managed"].registry, "registry.example.internal");
-  assert.equal(catalogue.entries[0].release, null, "input must not be mutated");
+  assert.equal(catalogue.entries[0].release, originalRelease, "input must not be mutated");
 });
 
 test("release recorder rejects unsafe or incomplete release identity", () => {

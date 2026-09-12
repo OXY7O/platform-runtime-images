@@ -45,7 +45,7 @@ platform-governance
 
 | Logical ID | Runtime | Lifecycle | Platform | Release | Lokasi |
 | --- | --- | --- | --- | --- | --- |
-| `php-ci/8.3` | PHP 8.3, Composer 2, Node.js 24 | `canonical` | `linux/amd64` | Menunggu `v0.1.1` | Menunggu release artifact pertama |
+| `php-ci/8.3` | PHP 8.3, Composer 2, Node.js 24 | `canonical` | `linux/amd64` | `v0.1.1` | `ghcr.io/oxy7o/platform-ci-php@sha256:e406cd0def2e69f3ca9800ab68ede80ad7f3a5fd7b23dc20b1927371d867db69` |
 
 [`catalogue/php-ci.json`](catalogue/php-ci.json) adalah machine-readable source
 of truth. Tag membantu manusia menemukan release, tetapi workflow hanya boleh
@@ -69,7 +69,7 @@ scripts/verify-image.sh platform-ci-php:local
 ```
 
 Consumer tidak menyalin Dockerfile ini. `platform-workflow` akan memanggil image
-berdasarkan digest approved setelah release pertama dan catalogue update selesai.
+berdasarkan digest yang telah disetujui dalam katalog.
 
 ## Release
 

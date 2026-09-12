@@ -8,6 +8,8 @@ import {validateCatalogue} from "../scripts/validate-catalogue.mjs";
 
 const expectedBase =
   "php:8.3-cli-bookworm@sha256:177529735599a8244b2c903522f029839dce1c2ac4be122fdc00ada4b45a20e4";
+const expectedReleaseDigest =
+  "sha256:e406cd0def2e69f3ca9800ab68ede80ad7f3a5fd7b23dc20b1927371d867db69";
 
 test("catalogue declares the controlled PHP 8.3 vertical slice", () => {
   const catalogue = JSON.parse(fs.readFileSync("catalogue/php-ci.json", "utf8"));
@@ -19,11 +21,18 @@ test("catalogue declares the controlled PHP 8.3 vertical slice", () => {
     logicalId: "php-ci/8.3",
     phpMinor: "8.3",
     lifecycle: "canonical",
-    release: null,
+    release: "0.1.1",
     platforms: ["linux/amd64"],
     baseImage: expectedBase,
     toolchain: {composerMajor: "2", nodeMajor: "24", xdebug: true},
-    locations: {"ghcr-public": null, "self-managed": null},
+    locations: {
+      "ghcr-public": {
+        registry: "ghcr.io",
+        repository: "oxy7o/platform-ci-php",
+        digest: expectedReleaseDigest,
+      },
+      "self-managed": null,
+    },
   });
 });
 

@@ -22,9 +22,9 @@ Workflow release hanya memiliki akses baca ke source. Karena itu pembaruan katal
 
 Satu versi SemVer tidak dapat digunakan ulang. Workflow berhenti sebelum build apabila tag image versi tersebut sudah tersedia di GHCR. Kegagalan release harus diperbaiki menggunakan versi baru agar identitas release dan audit trail tidak berubah.
 
-## Aktivasi GHCR public
+## Verifikasi GHCR public
 
-Setelah release pertama lulus, Platform Operations mengubah visibilitas package `platform-ci-php` menjadi public melalui pengaturan package GHCR. Source repository juga public dan tidak boleh menyimpan secret. Verifikasi dari sesi tanpa credential:
+Package `platform-ci-php` telah ditetapkan public melalui pengaturan package GHCR. Source repository juga public dan tidak boleh menyimpan secret. Setelah setiap release, verifikasi dari sesi tanpa credential:
 
 ```bash
 docker pull ghcr.io/oxy7o/platform-ci-php@sha256:<digest-dari-katalog>
