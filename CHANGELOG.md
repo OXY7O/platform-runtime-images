@@ -6,6 +6,11 @@ mengikuti [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Katalog `php-ci/8.3` kini menunjuk release `v0.1.1` dan digest GHCR public yang
+  telah melewati seluruh release gate.
+
 ### Planned
 
 - Approved digest integration dengan reusable Laravel workflow.

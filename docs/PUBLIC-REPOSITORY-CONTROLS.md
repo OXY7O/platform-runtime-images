@@ -41,8 +41,8 @@ file ini menjadi rekaman yang mudah direview dan tidak menyimpan secret.
 - Repository belum menyatakan lisensi open-source. Publik dapat membaca source,
   tetapi tidak ada hak penggunaan ulang yang diasumsikan sampai organisasi
   menyetujui dan menambahkan file lisensi.
-- Package GHCR menjadi public setelah release pertama berhasil dan digest katalog
-  telah direview.
+- Package GHCR `platform-ci-php` bersifat public. Setiap release tetap harus
+  menggunakan digest immutable yang disetujui melalui pull request katalog.
 
 Setiap perubahan pengaturan GitHub harus memperbarui tabel ini dalam pull request
 yang sama atau pada pull request evidence segera setelah perubahan administratif.
