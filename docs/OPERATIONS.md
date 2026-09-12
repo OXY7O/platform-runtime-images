@@ -5,14 +5,15 @@
 1. Buat GitHub Environment `runtime-image-release`.
 2. Tetapkan reviewer dari Platform Operations atau Platform Security dan cegah self-review jika paket GitHub organisasi mendukungnya.
 3. Terapkan ruleset pada `main` dan tag `v*.*.*`; perubahan workflow, policy, dan katalog harus melewati CODEOWNERS review.
-4. Pastikan runner `platform-ci` hanya menerima release dari commit yang telah direview dan tidak menyimpan deployment credential. Pull request public wajib berjalan pada ephemeral GitHub-hosted runner, bukan self-hosted runner.
+4. Jalankan pull request dan release pada standard GitHub-hosted `ubuntu-24.04`
+   yang ephemeral. Jangan memberikan akses release kepada self-hosted runner.
 
 Konfigurasi environment dan ruleset dilakukan melalui GitHub UI oleh Platform Operations. Workflow tidak boleh menganggap konfigurasi tersebut sudah aktif tanpa verifikasi evidence.
 
 ## Menjalankan release
 
 1. Pastikan pull request release sudah merged dan seluruh check hijau.
-2. Dari commit `main` yang sudah direview, buat signed annotated tag dengan stable Semantic Version `vMAJOR.MINOR.PATCH`, misalnya `v0.1.0`, lalu push tag tersebut. Tidak tersedia jalur release manual tanpa tag.
+2. Dari commit `main` yang sudah direview, buat signed annotated tag dengan stable Semantic Version `vMAJOR.MINOR.PATCH`, misalnya `v0.1.1`, lalu push tag tersebut. Tidak tersedia jalur release manual tanpa tag.
 3. Reviewer environment menyetujui job setelah memeriksa source SHA dan versi.
 4. Workflow membangun serta memublikasikan image, menarik ulang berdasarkan digest, menjalankan smoke test, membuat SBOM, memindai kerentanan, menandatangani image, dan membuat attestation.
 5. Setelah semua gate berhasil, workflow menerbitkan GitHub Release yang mencantumkan digest dan workflow run. Unduh artifact release evidence. `release-evidence.json` mengikat digest dengan signature identity, provenance attestation, checksum SBOM, dan workflow run. Gunakan `php-ci.catalogue.candidate.json` untuk pull request katalog; jangan menyalin digest secara manual.

@@ -2,7 +2,7 @@
 
 Dokumen ini mencatat kontrol yang aktif pada repository
 `OXY7O/platform-runtime-images`. Status diverifikasi melalui GitHub API pada
-11 September 2026. Pengaturan GitHub tetap menjadi source of truth operasional;
+12 September 2026. Pengaturan GitHub tetap menjadi source of truth operasional;
 file ini menjadi rekaman yang mudah direview dan tidak menyimpan secret.
 
 ## Kontrol aktif
@@ -18,8 +18,10 @@ file ini menjadi rekaman yang mudah direview dan tidak menyimpan secret.
 | Dependency security | Aktif | Vulnerability alerts, security updates, dan Dependabot |
 | Pelaporan kerentanan | Aktif | Private vulnerability reporting |
 | Pull request runner | Aktif | Ephemeral GitHub-hosted `ubuntu-24.04` dengan `contents: read` |
+| Release runner | Aktif | Ephemeral GitHub-hosted `ubuntu-24.04` dengan permission per job |
 | Release approval | Aktif | Environment `runtime-image-release`, reviewer `@lethisa`, prevent self-review |
-| Release branch policy | Sementara | `main`; diganti menjadi tag `v*.*.*` saat workflow SemVer merged |
+| Release branch policy | Aktif | Hanya tag `v*.*.*` |
+| Main ruleset | Aktif | `Public main protection`: PR, squash-only, CODEOWNERS, strict status check, linear history |
 
 ## Kontrol berbasis repository
 
@@ -29,14 +31,13 @@ file ini menjadi rekaman yang mudah direview dan tidak menyimpan secret.
   vulnerability policy pada ephemeral GitHub-hosted runner tanpa deployment
   credential. Self-hosted runner tidak menerima kode pull request public.
 - Release hanya menerima signed annotated SemVer tag yang menunjuk commit pada
-  `main` dan menerbitkan GitHub Release setelah seluruh gate berhasil.
+  `main`, berjalan pada ephemeral `ubuntu-24.04`, dan menerbitkan GitHub Release
+  setelah seluruh gate berhasil.
 - Security advisory digunakan untuk laporan kerentanan; public issue tidak boleh
   memuat detail kerentanan yang belum ditangani.
 
 ## Batasan dan keputusan tertunda
 
-- Branch ruleset belum diaktifkan sampai required status check pada pull request
-  ini terverifikasi. Ruleset harus direkam pada pembaruan dokumen berikutnya.
 - Repository belum menyatakan lisensi open-source. Publik dapat membaca source,
   tetapi tidak ada hak penggunaan ulang yang diasumsikan sampai organisasi
   menyetujui dan menambahkan file lisensi.

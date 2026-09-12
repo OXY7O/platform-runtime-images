@@ -30,8 +30,19 @@ test("public repository has governed community health files", () => {
   const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
   assert.match(changelog, /Semantic Versioning/u);
   assert.match(changelog, /## \[Unreleased\]/u);
-  assert.doesNotMatch(changelog, /## \[0\.1\.0\] -/u);
+  assert.match(changelog, /## \[0\.1\.1\] - 2026-09-12/u);
+  assert.match(changelog, /## \[0\.1\.0\] - 2026-09-11 \[YANKED\]/u);
+  assert.match(changelog, /no (?:image|artifact).*published/iu);
   assert.match(changelog, /### Added/u);
+
+  const controls = fs.readFileSync("docs/PUBLIC-REPOSITORY-CONTROLS.md", "utf8");
+  assert.match(controls, /Public main protection/u);
+  assert.match(controls, /Release runner.*ubuntu-24\.04/isu);
+  assert.match(controls, /Release branch policy.*v\*\.\*\.\*/isu);
+  assert.doesNotMatch(controls, /Branch ruleset belum diaktifkan|Release branch policy \| Sementara/u);
+
+  const packageMetadata = JSON.parse(fs.readFileSync("package.json", "utf8"));
+  assert.equal(packageMetadata.version, "0.1.1");
 
   const security = fs.readFileSync("SECURITY.md", "utf8");
   assert.match(security, /security\/advisories\/new/u);

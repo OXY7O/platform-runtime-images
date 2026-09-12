@@ -48,10 +48,11 @@ Kontrol tersebut mengurangi risiko, tetapi tidak menyamai isolasi runner ephemer
   jaringan runner internal.
 - Workflow pull request tetap `contents: read`, tidak memiliki package, OIDC,
   environment, atau deployment credential, dan tidak dapat publish.
-- Self-hosted runner `platform-ci` hanya dipakai oleh protected release dari
-  signed annotated tag yang menunjuk commit `main` dan melewati required reviewer.
-- Penutupan akhir diverifikasi melalui successful canary pada pull request yang
-  menerapkan perubahan ini.
+- Pull request dan release memakai `ubuntu-24.04` yang ephemeral. Release hanya
+  dimulai dari signed annotated tag yang menunjuk commit `main` dan melewati
+  required reviewer.
+- Self-hosted runner tidak menerima source atau credential dari repository public.
+- Penutupan akhir diverifikasi melalui successful canary pull request dan release.
 
 ## GAP-BUILD-2026-002 — Reproducibility input build
 

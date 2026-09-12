@@ -15,7 +15,7 @@ concurrency:
 jobs:
   release-php-83:
     environment: runtime-image-release
-    runs-on: [self-hosted, platform-ci]
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: read
@@ -229,7 +229,7 @@ jobs:
   publish-github-release:
     needs: [release-php-83]
     environment: runtime-image-release
-    runs-on: [self-hosted, platform-ci]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: write

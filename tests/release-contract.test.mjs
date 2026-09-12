@@ -19,7 +19,7 @@ test("release workflow is protected, immutable, and verifies the published diges
 
   const job = workflow.jobs["release-php-83"];
   assert.equal(job.environment, "runtime-image-release");
-  assert.deepEqual(job["runs-on"], ["self-hosted", "platform-ci"]);
+  assert.equal(job["runs-on"], "ubuntu-24.04");
   assert.deepEqual(job.permissions, {
     contents: "read",
     packages: "write",
@@ -29,6 +29,7 @@ test("release workflow is protected, immutable, and verifies the published diges
   const githubRelease = workflow.jobs["publish-github-release"];
   assert.deepEqual(githubRelease.needs, ["release-php-83"]);
   assert.equal(githubRelease.environment, "runtime-image-release");
+  assert.equal(githubRelease["runs-on"], "ubuntu-24.04");
   assert.deepEqual(githubRelease.permissions, {contents: "write"});
 
   const serialized = JSON.stringify(workflow);
@@ -49,6 +50,7 @@ test("release workflow is protected, immutable, and verifies the published diges
   assert.match(serialized, /scripts\/create-release-evidence\.mjs/u);
   assert.match(serialized, /github\.rest\.repos\.createRelease/u);
   assert.doesNotMatch(serialized, /pull_request_target|latest|docker push/u);
+  assert.doesNotMatch(serialized, /self-hosted/u);
 
   for (const step of job.steps) {
     if (step.uses) assert.match(step.uses, /@[a-f0-9]{40}$/u, step.uses);
