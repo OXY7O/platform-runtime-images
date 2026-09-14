@@ -1,0 +1,23 @@
+name: Usulan runtime
+description: Ajukan runtime, versi, atau capability supply chain baru
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Kebutuhan dan pengguna terdampak
+    validations:
+      required: true
+  - type: textarea
+    id: lifecycle
+    attributes:
+      label: Lifecycle, compatibility, dan migration plan
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Kriteria penerimaan dan evidence
+    validations:
+      required: true
